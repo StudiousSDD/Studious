@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{% block title %}Studious{% endblock %}</title>
+    {% load static %}
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+  </head>
+
+  <body>
+    <nav class="navbar navbar-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+          <img src="{% static 'images/MainLogo.png' %}" alt="" width="auto" height="64px">
+        </a>
+      </div>
+    </nav>
+    <div class="container-lg">
+      {% block content %}
+      {% endblock %}
+    </div>
+  </body>
+</html>
