@@ -4,3 +4,6 @@ from django.shortcuts import render
 
 def home_calendar_view(request):
     return render(request, "notes/calendar.html")
+
+def view_classes(request):
+    return render(request, "notes/view-classes.html")
