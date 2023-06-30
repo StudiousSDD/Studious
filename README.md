@@ -31,8 +31,10 @@ Once you have activated the environment (`env\Scripts\activate.bat` for Windows,
 pip install -r requirements.txt
 ```
 
+Django model/database migrations must also be applied (saved using the `py manage.py makemigrations` command when you change the model) before starting the server:
+
+Windows: `py manage.py migrate` / Mac/UNIX: `python manage.py migrate`
+
 The web app can now be started with the following command:
 
-Windows: `py manage.py runserver`
-
-Mac/UNIX: `python manage.py runserver`
+Windows: `py manage.py runserver` / Mac/UNIX: `python manage.py runserver`
