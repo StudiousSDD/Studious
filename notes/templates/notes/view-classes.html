@@ -1,0 +1,77 @@
+{% extends "base_generic.html" %}
+
+{% load static %}
+
+{% block content %}
+<div class="row">
+  <div class="col-sm-3 col-12 border-end">
+    <div class="row">
+      <div class="col-12 mb-3">
+        <h2>Classes</h2>
+        <div class="list-group">
+          <a class="list-group-item list-group-item-action list-group-item-primary" href="#class1">Class 1</a>
+          <a class="list-group-item list-group-item-action list-group-item-success" href="#class2">Class 2</a>
+          <a class="list-group-item list-group-item-action list-group-item-danger" href="#class3">Class 3</a>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 mb-3">
+        <h2>Other</h2>
+        <div class="list-group">
+          <a class="list-group-item list-group-item-action list-group-item-warning" href="#meeting1">Meeting 1</a>
+          <a class="list-group-item list-group-item-action list-group-item-dark" href="#nocat">No Category</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-9 col-12 border-start">
+      <input type="text" id="SEARCH" name="SEARCH" style="width:100%;" placeholder="Search for notes...">
+      
+      <h1>Classes</h1>
+      <h2 id="class1">Class 1</h2>
+      <ul class="unstyled-list">
+        <li>Lecture 1: The brain</li>
+        <li>Lecture 2: The amygdala</li>
+        <li>Lecture 3: The frontal cortex</li>
+        <li>etc.</li>
+      </ul>
+      <h2 id="class2">Class 2</h2>
+      <ul class="unstyled-list">
+        <li>Lecture 1: Programming in C</li>
+        <li>Lecture 2: IPC and pipes</li>
+        <li>Lecture 3: Process scheduling</li>
+        <li>etc.</li>
+        <li></li>
+      </ul>
+      <h2 id="class3">Class 3</h2>
+      <ul class="unstyled-list">
+        <li>Lecture 1: User stories</li>
+        <li>Lecture 2: Design patterns</li>
+        <li>Lecture 3: Planning poker</li>
+        <li>etc.</li>
+        <li></li>
+        <li></li>
+      </ul>
+      <h1>Other</h1>
+      <h2 id="meeting1">Meeting 1</h2>
+      <ul class="unstyled-list">
+        <li>What to name our company</li>
+        <li>Board of directors meeting</li>
+        <li>Angel investor funds</li>
+        <li>etc.</li>
+        <li></li>
+        <li></li>
+      </ul>
+      <h2 id="nocat">No Category</h2>
+      <ul class="unstyled-list">
+        <li>Banquet planning</li>
+        <li>First aid</li>
+        <li>How to pitch a tent</li>
+        <li>Warframe lore</li>
+      </ul>
+
+
+  </div>
+</div>
+{% endblock %}
