@@ -7,31 +7,33 @@
   <div class="col-lg-9 col-12 border">
     <img src="{% static 'images/calendar.png' %}" class="img-fluid"></img>
   </div>
-  <div class="col-lg-3 col-12">
-    <div class="row border mb-3">
-      <h1>Class List</h1>
-      <div class="list-group">
-        <a class="list-group-item list-group-item-action list-group-item-primary" href="#">Class 1</a>
-        <a class="list-group-item list-group-item-action list-group-item-success" href="#">Class 2</a>
-        <a class="list-group-item list-group-item-action list-group-item-danger" href="#">Class 3</a>
+  <div class="col-lg-3 col-12 border">
+    <div class="row">
+      <div class="col-lg-12 col-6 mb-lg-3">
+        <h1>Class List</h1>
+        <div class="list-group">
+          <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'notes:view_classes' %}">Class 1</a>
+          <a class="list-group-item list-group-item-action list-group-item-success" href="{% url 'notes:view_classes' %}">Class 2</a>
+          <a class="list-group-item list-group-item-action list-group-item-danger" href="{% url 'notes:view_classes' %}">Class 3</a>
+        </div>
       </div>
-    </div>
-    <div class="row border">
-      <h1>To-do List</h1>
-      <ul class="list-group">
-        <li class="list-group-item">
-          <input class="form-check-input me-1" type="checkbox" value="">
-          Look over lecture notes for Class 2
-        </li>
-        <li class="list-group-item">
-          <input class="form-check-input me-1" type="checkbox" value="">
-          Start homework for Class 1
-        </li>
-        <li class="list-group-item">
-          <input class="form-check-input me-1" type="checkbox" value="">
-          Finish take-home exam for Class 3
-        </li>
-      </ul>
+      <div class="col-lg-12 col-6 mb-lg-3">
+        <h1>To-do List</h1>
+        <ul class="list-group">
+          <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="">
+            Look over lecture notes for Class 2
+          </li>
+          <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="">
+            Start homework for Class 1
+          </li>
+          <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="">
+            Finish take-home exam for Class 3
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </div>
