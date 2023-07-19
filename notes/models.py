@@ -15,8 +15,12 @@ class Meeting(models.Model):
         return title.format(self.meeting_number)
 
 class Note(models.Model):
-    meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
-    note_title = models.CharField(max_length=200)
-    note_body = models.TextField()
+    # meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    content = models.TextField(blank=True, null=True)
+
+    class Meta:
+        ordering = ('title',) # Order by title alphabetically 
+
     def __str__(self):
-        return self.note_title
+        return self.title
