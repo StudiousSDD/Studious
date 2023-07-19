@@ -13,6 +13,15 @@ class Meeting(models.Model):
     def __str__(self):
         title = "Meeting #{}"
         return title.format(self.meeting_number)
+    
+class Class(models.Model):
+    name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering=('name',)   #   Order by class name alphabetically? 
+    def __str__(self):
+        return self.name
 
 class Note(models.Model):
     # meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)

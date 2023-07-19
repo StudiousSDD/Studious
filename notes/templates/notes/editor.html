@@ -11,6 +11,9 @@
     <body>
         <nav class="navbar is-dark">
             <div class="navbar-brand">
+                <a href="{% url 'notes:home_page' %}" class="navbar-item">Home</a>
+            </div>
+            <div class="navbar-brand">
                 <a href="{% url 'editor' %}" class="navbar-item">Notes</a>
             </div>
 
@@ -47,9 +50,9 @@
                             <label class="label">
                                 Title
                                 {%if document%}
-                                <span class="has-text-grey-light">
-                                    Created at: {{ document.created_at|date:"m/d Y"}} /
-                                    Modified at: {{ document.modified_at|date:"m/d Y"}}
+                                <span class="has-text-grey-light" style="float:right">
+                                    Created at: {{ document.created_at|date:"m/d/Y"}} | 
+                                    Modified at: {{ document.modified_at|date:"m/d/Y"}}
                                 </span>
                                 {% endif %}
                             </label>
