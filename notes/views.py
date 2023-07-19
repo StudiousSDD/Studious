@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 
-from .models import Note
+from .models import Note, Class
 # Create your views here.
 
 def editor(request):
@@ -40,7 +40,33 @@ def home_calendar_view(request):
     return render(request, "notes/calendar.html")
 
 def view_classes(request):
-    return render(request, "notes/view-classes.html")
+    classes = Class.objects.all()
+    classid = int(request.GET.get('classid',0))
+
+    if request.method == 'POST':
+        classid = int(request.POST.get('classid',0))
+        title = request.POST.get('title')
+        if classid > 0:
+            a_class = Class.objects.get(pk=classid) # Change document 
+            a_class.title = title
+            a_class.save()
+
+        else:
+            a_class = Class.objects.create
+        
+
+    if classid > 0:
+        a_class = Class.objects.get(pk=classid) 
+    else: 
+        a_class = ''
+
+    context = {
+        'classes' : classes,
+        'classid' : classid,
+        'a_class' : a_class,
+    }
+    return render(request, "notes/view-classes.html", context)
+
 
 def delete_document(request, noteid):
     document = Note.objects.get(pk=noteid)
@@ -48,3 +74,6 @@ def delete_document(request, noteid):
 
     return redirect('/notes/?noteid=0')
 
+
+def add_class(request):
+    return redirect('/classes/')

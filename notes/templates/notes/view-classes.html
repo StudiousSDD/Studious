@@ -7,7 +7,14 @@
   <div class="col-sm-3 col-12 border-end">
     <div class="row sticky-top">
       <div class="col-12 mb-3">
-        <h2>Classes</h2>
+        <h2>Classes
+          <button class="button is-primary" style="float:right"> + </button>
+        </h2>
+        <div class="class-list">
+          {% for classes in classes %}
+            <a class="list-group-item list-group-item-action list-group-item-primary">{{classes.name}}</a>
+          {% endfor %}
+        </div>
         <div class="list-group">
           <a class="list-group-item list-group-item-action list-group-item-primary" href="#class1">Class 1</a>
           <a class="list-group-item list-group-item-action list-group-item-success" href="#class2">Class 2</a>
