@@ -17,7 +17,9 @@ class Meeting(models.Model):
 class Note(models.Model):
     # meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
-    content = models.TextField(blank=True, null=True)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ('title',) # Order by title alphabetically 
