@@ -7,28 +7,68 @@
 
 <head>
   <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
-    <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
-    <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+  <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
+  <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+  <!-- <link href="{% static 'notes/static/myfirst.css' %}" rel="stylesheet"> -->
+
+<style>
+  div.container {
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 10px;
+    color: maroon;
+    background-color: lightpink;
+    justify-content: space-between;
+    height: 100%;
+  }
+
+  div.className {
+    display: flex;
+  }
+
+  h2.container {
+    display: flex;
+    border-radius: 10px;
+    color: Black;
+    justify-content: space-between;
+  }
+
+  a.addClassLink {
+    border-radius: 50%;
+    height: 40px;
+    width: 40px;
+    display: flex;
+    background-color: maroon;
+    justify-content: center;
+    justify-items: center;
+  }
+
+  a.addClassLink:link{
+    text-decoration: none;
+  }
+</style>
 </head>
+
 <body>
 <div class="row">
   <div class="col-sm-3 col-12 border-end">
     <div class="row sticky-top">
       <div class="col-12 mb-3">
-        <h2>
+        <h2 class="container">
           Classes
-          <a href="{% url 'notes:add_class' %}" style="background-color: grey; float:right; border: 2px; border-radius: 5px;">
-              <i class="fa-solid fa-plus" style="color: white; "></i>
+          <a href="{% url 'notes:add_class' %}" class="addClassLink">
+              <i class="fa-solid fa-plus" style="color: white; align-self: center; justify-self: center; "></i>
           </a>
         </h2>
         <div class="class-list">
           {% for classes in classes %}
-            <li>
-            <a >{{classes.name}}
     
-            <a href="{% url 'notes:delete_class' classes.id %}" class="button is-danger" style="float:right">Delete</a>
-            </a>
-            </li>
+            <div class="container">
+            <div>{{classes.name}}</div>
+    
+            <a href="{% url 'notes:delete_class' classes.id %}" class="button is-danger" style=""><i class="fa-solid fa-trash" style="color: maroon"></i></a>
+            </div>
+    
           {% endfor %}
         </div>
         <div class="list-group">
