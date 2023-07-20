@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 
 from .models import Note, Class
+from .forms import AddClass
 # Create your views here.
 
 def editor(request):
@@ -45,14 +46,16 @@ def view_classes(request):
 
     if request.method == 'POST':
         classid = int(request.POST.get('classid',0))
-        title = request.POST.get('title')
+        name = request.POST.get('name')
         if classid > 0:
             a_class = Class.objects.get(pk=classid) # Change document 
-            a_class.title = title
+            a_class.name = name
             a_class.save()
+            return redirect('/classes/?classid=%i' % classid)
 
         else:
             a_class = Class.objects.create
+            return redirect('/classes/?classid=%i' % a_class.id)
         
 
     if classid > 0:
@@ -76,4 +79,16 @@ def delete_document(request, noteid):
 
 
 def add_class(request):
+    if request.POST:
+        form = AddClass(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+        return redirect('/classes/')
+    
+    return render(request, "notes/add_class.html",{'form': AddClass})
+
+def delete_class(request, classid):
+    a_class = Class.objects.get(pk=classid)
+    a_class.delete()
+
     return redirect('/classes/')
