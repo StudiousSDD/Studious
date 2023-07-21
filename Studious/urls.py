@@ -16,8 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from notes.views import editor
+from notes.views import view_classes
+from notes.views import add_class
 
 urlpatterns = [
     path("", include("notes.urls")),
     path('admin/', admin.site.urls),
+    path('notes/',editor, name='editor'),
+    path('classes/',view_classes,name='view_classes'),
+    path('add_class/',add_class,name='add_class'),
 ]
