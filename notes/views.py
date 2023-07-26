@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
 
-from .models import Note, Class
+from .models import Note, Class, Lecture
 from .forms import AddClass
+
+from schedule.models.events import Event, Occurrence
 # Create your views here.
 
 def editor(request):
@@ -38,7 +40,20 @@ def editor(request):
     return render(request, 'notes/editor.html',context)                 
 
 def home_calendar_view(request):
-    return render(request, "notes/calendar.html")
+    all_classes = Class.objects.all()
+    context = {
+        'classes' : all_classes,
+    }
+    return render(request, "notes/calendar.html", context)
+
+def view_meeting_by_date(request):
+    eventid = int(request.GET.get('event',0))
+    start = request.GET.get('start',0)
+    end = request.GET.get('end',0)
+    
+    
+    
+    return
 
 def view_classes(request):
     classes = Class.objects.all()
