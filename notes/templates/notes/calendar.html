@@ -24,7 +24,14 @@
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
           },
-          events: '/schedule/api/occurrences?calendar_slug=main-calendar',
+          events: {
+            url: '/schedule/api/occurrences?calendar_slug=main-calendar',
+          },
+          eventClick: function(info) {
+            {% comment %} alert(info.event.start) {% endcomment %}
+            {% comment %} alert(info.event.end) {% endcomment %}
+            window.open( '{% url "view_meeting_by_date" %}?event=' + info.event.id + '&start=' + info.event.start + '&end=' + info.event.end, target="_self")
+          },
         });
         calendar.render();
       });
@@ -36,9 +43,9 @@
       <div class="col-lg-12 col-6 mb-lg-3">
         <h1>Class List</h1>
         <div class="list-group">
-          <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'notes:view_classes' %}">Class 1</a>
-          <a class="list-group-item list-group-item-action list-group-item-success" href="{% url 'notes:view_classes' %}">Class 2</a>
-          <a class="list-group-item list-group-item-action list-group-item-danger" href="{% url 'notes:view_classes' %}">Class 3</a>
+          {% for c in classes %}
+            <a class="list-group-item list-group-item-action" style="background-color: {{ c.calendar_event.color_event }}" href="{% url 'notes:view_classes' %}">{{ c.name_text }}</a>
+          {% endfor %}
         </div>
       </div>
       <div class="col-lg-12 col-6 mb-lg-3">
