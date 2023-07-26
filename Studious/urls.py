@@ -26,4 +26,5 @@ urlpatterns = [
     path('notes/',editor, name='editor'),
     path('classes/',view_classes,name='view_classes'),
     path('add_class/',add_class,name='add_class'),
+    path('schedule/', include("schedule.urls")),
 ]
