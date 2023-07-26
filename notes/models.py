@@ -2,11 +2,14 @@ from django.db import models
 from datetime import date
 from django.utils import timezone
 
+from schedule.models.events import Event
+
 # Create your models here.
 class Event(models.Model):
     name_text = models.CharField(max_length=200)
-    start_date = models.DateField(default=date.today);
-    end_date = models.DateField(default=date.today);
+    # calendar_event will point to an event from the django-scheduler app 
+    # which is what makes the calendar on the main screen populate      -Tom
+    calendar_event = models.ForeignKey(Event, on_delete=models.CASCADE)
     def __str__(self):
         return self.name_text
     
@@ -21,6 +24,10 @@ class Schedule(models.Model):
 
 class Meeting(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    # instead of a FK to an Event, a meeting should probably have an FK
+    # to an Occurance from the django-scheduler app. These are auto-generated
+    # from the django-scheduler Events as necessary. Once there is an FK to
+    # one, I believe it will save it in the database long-term          -Tom
     meeting_number = models.IntegerField(default=0)
     def __str__(self):
         title = " Meeting #{}"
@@ -37,6 +44,9 @@ class Class(models.Model):
 
 class Note(models.Model):
     # meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
+    
+    # A FK to a Meeting above (which is then connected to an Occurance) I think is
+    # what we'd want here.              -Tom
     title = models.CharField(max_length=255)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
