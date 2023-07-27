@@ -51,7 +51,7 @@ def view_meeting_by_date(request):
     start = request.GET.get('start',0)
     end = request.GET.get('end',0)
     
-    
+    # TODO: Implement this. Needs to find the Lecture and Occurrence (link?)
     
     return
 

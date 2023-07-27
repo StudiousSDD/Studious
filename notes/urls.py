@@ -7,7 +7,7 @@ from notes.views import editor, delete_document, delete_class, view_classes
 app_name = "notes"
 urlpatterns = [
     path("", views.home_calendar_view, name="home_page"),
-    path("classes/<int:classid>", delete_class, name="delete_class"),
+    path("classes/<int:classid>/delete", delete_class, name="delete_class"),
     path('delete_document/<int:noteid>/', delete_document, name='delete_document'),
     path('add_class/',views.add_class, name='add_class'),
     path('add_event/',views.add_event, name='add_event'),
