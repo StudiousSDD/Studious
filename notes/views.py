@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 
 from .models import Note, Class, Lecture
-from .forms import AddClass
+from .forms import AddClass,AddEvent
 
 from schedule.models.events import Event, Occurrence
 # Create your views here.
@@ -102,8 +102,28 @@ def add_class(request):
     
     return render(request, "notes/add_class.html",{'form': AddClass})
 
+def create_event(form):
+    event_title = form.cleaned_data['title']
+    create_class_from_event_title(event_title)
+    event = Event.objects.create(title=event_title, start=form.cleaned_data['start'], end=form.cleaned_data['end'], calendar=form.cleaned_data['calendar'])
+    return event
+
+def add_event(request):
+    if request.POST:
+        form = AddEvent(request.POST,request.FILES)
+        if form.is_valid():
+            event = form.save()
+            create_class_from_event_title(event.title)
+        return redirect('/classes/')
+    return render(request, "notes/add_event.html",{'form': AddEvent})
+
 def delete_class(request, classid):
     a_class = Class.objects.get(pk=classid)
     a_class.delete()
 
     return redirect('/classes/')
+
+def create_class_from_event_title(event_title):
+    class_name = event_title
+    class_object = Class(name=class_name)
+    class_object.save() 

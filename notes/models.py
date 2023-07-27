@@ -11,6 +11,9 @@ class Class(models.Model):
 
     name = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
+    #startTimeDate = models.DateField()
+    # calendar_event = models.OneToOneField(Event, on_delete=models.CASCADE)
+
 
     class Meta:
         ordering=('name',)   #   Order by class name alphabetically? 
