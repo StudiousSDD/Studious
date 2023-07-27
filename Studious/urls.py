@@ -28,6 +28,7 @@ urlpatterns = [
     path('notes/', views.editor, name='editor'),
     path('classes/', views.view_classes,name='view_classes'),
     path('add_class/', views.add_class,name='add_class'),
+    path('add_event/', views.add_event,name='add_event'),
     path('schedule/', include("schedule.urls")),
     path('meeting/', views.view_meeting_by_date, name='view_meeting_by_date'),
 ]

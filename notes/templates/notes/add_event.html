@@ -1,0 +1,6 @@
+
+<form method="POST" action="{% url 'add_event' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{form}}
+   <button>Submit</button>
+</form> 
