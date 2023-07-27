@@ -4,6 +4,7 @@ from .models import Note, Class, Lecture
 from .forms import AddClass,AddEvent
 
 from schedule.models.events import Event, Occurrence
+from schedule.models.rules import Rule
 # Create your views here.
 
 def editor(request):
@@ -104,8 +105,13 @@ def add_class(request):
 
 def create_event(form):
     event_title = form.cleaned_data['title']
-    create_class_from_event_title(event_title)
-    event = Event.objects.create(title=event_title, start=form.cleaned_data['start'], end=form.cleaned_data['end'], calendar=form.cleaned_data['calendar'])
+    event = Event.objects.create(title=event_title, 
+                                 start=form.cleaned_data['start'], 
+                                 end=form.cleaned_data['end'], 
+                                 calendar=form.cleaned_data['calendar'], 
+                                 color_event=form.cleaned_data['color_event'],
+                                )
+    create_class_from_event(event)
     return event
 
 def add_event(request):
@@ -113,17 +119,39 @@ def add_event(request):
         form = AddEvent(request.POST,request.FILES)
         if form.is_valid():
             event = form.save()
-            create_class_from_event_title(event.title)
+            repeat = form.cleaned_data["repeat"]
+            rule = create_rule(event.title, repeat)
+            event.rule = rule
+            event.save()
+            create_class_from_event(event)
         return redirect('/classes/')
     return render(request, "notes/add_event.html",{'form': AddEvent})
 
 def delete_class(request, classid):
     a_class = Class.objects.get(pk=classid)
+    a_event = a_class.calendar_event
     a_class.delete()
+    a_event.delete()
 
     return redirect('/classes/')
 
-def create_class_from_event_title(event_title):
-    class_name = event_title
-    class_object = Class(name=class_name)
+def create_rule(ename, rep):
+    rrname = (ename + '_repeat')
+    desc = rrname
+    freq = "WEEKLY"    
+    params = "byweekday:"
+    for r in rep:
+        params += (r + ',')
+    
+    rule = Rule.objects.create(name = rrname,
+                               description = desc,
+                               frequency = freq,
+                               params = params
+                              )
+    rule.save()
+    return rule
+
+def create_class_from_event(event):
+    class_name = event.title
+    class_object = Class.objects.create(name=class_name, calendar_event=event)
     class_object.save() 
