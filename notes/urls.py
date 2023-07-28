@@ -2,14 +2,14 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 
-from notes.views import editor, delete_document, delete_class, view_classes
+from notes.views import editor, delete_document, delete_class, view_class
 
 app_name = "notes"
 urlpatterns = [
     path("", views.home_calendar_view, name="home_page"),
-    path("classes/<int:classid>/delete", delete_class, name="delete_class"),
+    path("class/<int:classid>/delete", delete_class, name="delete_class"),
     path('delete_document/<int:noteid>/', delete_document, name='delete_document'),
-    path('add_class/',views.add_class, name='add_class'),
-    path('add_event/',views.add_event, name='add_event'),
-    path('classes/',view_classes,name='view_classes'),
+    path('add_class/', views.add_class, name='add_class'),
+    path('add_event/', views.add_event, name='add_event'),
+    path('class/<str:classname>/', view_class, name='view_class'),
 ]

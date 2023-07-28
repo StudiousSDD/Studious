@@ -22,6 +22,7 @@ class Class(models.Model):
 
 class Lecture(models.Model):
     occurrence = models.ForeignKey(Occurrence, on_delete=models.CASCADE, null=True)
+    event = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
 
     meeting_number = models.IntegerField(default=0)
     def __str__(self):
@@ -41,4 +42,4 @@ class Note(models.Model):
         ordering = ('title',) # Order by title alphabetically 
 
     def __str__(self):
-        return self.meeting.__str__() + " " + self.note_title
+        return self.lecture.__str__() + " " + self.title

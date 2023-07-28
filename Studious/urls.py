@@ -26,7 +26,7 @@ urlpatterns = [
     path("", include("notes.urls")),
     path('admin/', admin.site.urls),
     path('notes/', views.editor, name='editor'),
-    path('classes/', views.view_classes,name='view_classes'),
+    path('class/', views.view_class,name='view_class'),
     path('add_class/', views.add_class,name='add_class'),
     path('add_event/', views.add_event,name='add_event'),
     path('schedule/', include("schedule.urls")),

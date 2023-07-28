@@ -5,7 +5,26 @@
 
 
 {% block add_to_head %}
+  <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+  <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
+  <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
+  <style>
+      a.addClassLink {
+      border-radius: 50%;
+      height: 40px;
+      width: 40px;
+      display: flex;
+      background-color: maroon;
+      justify-content: center;
+      justify-items: center;
+    }
+
+    a.addClassLink:link{
+      text-decoration: none;
+    }
+  </style>
 {% endblock %}
 
 {% block content %}
@@ -44,8 +63,13 @@
         <h1>Class List</h1>
         <div class="list-group">
           {% for c in classes %}
-            <a class="list-group-item list-group-item-action" style="background-color: {{ c.calendar_event.color_event }}" href="{% url 'notes:view_classes' %}">{{ c.name }}</a>
+            <a class="list-group-item list-group-item-action" style="background-color: {{ c.calendar_event.color_event }}" href="/class/{{ c.name }}/">{{ c.name }}</a>
           {% endfor %}
+          <h2>
+            <a href="{% url 'notes:add_event' %}" class="addClassLink">
+              <i class="fa-solid fa-plus" style="color: white; align-self: center; justify-self: center; "></i>
+            </a>
+          </h2>
         </div>
       </div>
       <div class="col-lg-12 col-6 mb-lg-3">
