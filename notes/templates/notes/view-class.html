@@ -68,7 +68,7 @@
         </div>
         <div class="list-group">
           {% for c in classes %}
-            <a class="list-group-item list-group-item-action" href="#{{ c.id }}" style="background-color: {{ c.calendar_event.color_event }}">{{ c.name }}</a>
+            <a class="list-group-item list-group-item-action" style="background-color: {{ c.calendar_event.color_event }}" href="/class/{{ c.name }}/">{{ c.name }}</a>
           {% endfor %}
         </div>
       </div>
@@ -90,16 +90,16 @@
       </div>
       <ul class="unstyled-list">
         {% for n in l.note_set.all %}
-          <li>{{n.title}}</li>
+          <li><a href="{% url 'notes:editor' %}?noteid={{n.id}}">{{n.title}}</a></li>
         {% endfor %}
       </ul>
       <div class = "col-5">
         <a href="{% url 'notes:editor' %}">New Note</a>
       </div>
       {% endfor %}
-      <div class = "col-11">
+      {% comment %} <div class = "col-11">
         <h3><a href="{% url 'notes:editor' %}">New Lecture (not implemented)</a></h3>
-      </div>
+      </div> {% endcomment %}
 
   </div>
 </div>
