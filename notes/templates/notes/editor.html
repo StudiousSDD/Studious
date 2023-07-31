@@ -16,7 +16,7 @@
 
             <div class="navbar-menu">
                 <div class="navbar-end">
-                    <a href="{% url 'editor' %}?noteid=0" class="navbar-item">New Note</a>
+                    <a href="{% url 'notes:editor' %}?noteid=0" class="navbar-item">New Note</a>
                 </div>
             </div>
         </nav>
@@ -31,7 +31,7 @@
                         <ul class="menu-list">
                             {% for note in note %}
                             <li>
-                                <a href="{% url 'editor' %}?noteid={{ note.id }}">{{note.title}}</a>
+                                <a href="{% url 'notes:editor' %}?noteid={{ note.id }}">{{note.title}}</a>
                             </li>
                             {% endfor %}
                         </ul>
@@ -39,7 +39,7 @@
                 </div>
 
                 <div class="column is-10">
-                    <form method="post" action="{% url 'editor' %}">
+                    <form method="post" action="{% url 'notes:editor' %}">
                         {% csrf_token %}
                         <input type="hidden" name="noteid" value="{{noteid}}">
 

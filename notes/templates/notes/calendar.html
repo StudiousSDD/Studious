@@ -49,7 +49,8 @@
           eventClick: function(info) {
             {% comment %} alert(info.event.start) {% endcomment %}
             {% comment %} alert(info.event.end) {% endcomment %}
-            window.open( '{% url "view_meeting_by_date" %}?event=' + info.event.id + '&start=' + info.event.start + '&end=' + info.event.end, target="_self")
+            {% comment %} window.open( '{% url "notes:view_class" info.event.title %}', target="_self") {% endcomment %}
+            window.open( '/class/' + info.event.title, target="_self")
           },
         });
         calendar.render();
