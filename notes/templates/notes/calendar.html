@@ -15,10 +15,11 @@
       border-radius: 50%;
       height: 40px;
       width: 40px;
-      display: flex;
+      display: inline-flex;
       background-color: maroon;
       justify-content: center;
       justify-items: center;
+      margin-top: 10px;
     }
 
     a.addClassLink:link{
@@ -69,6 +70,9 @@
           <h2>
             <a href="{% url 'notes:add_event' %}" class="addClassLink">
               <i class="fa-solid fa-plus" style="color: white; align-self: center; justify-self: center; "></i>
+            </a>
+            <a href="{% url 'notes:import_class' %}" class="addClassLink">
+              <i class="fa-solid fa-file-import" style="color: white; align-self: center; justify-self: center; "></i>
             </a>
           </h2>
         </div>
