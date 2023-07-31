@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponse
 
 from .models import Note, Class, Lecture
 from .forms import AddClass,AddEvent
@@ -10,7 +10,15 @@ from schedule.models.rules import Rule
 def editor(request):
     noteid = int(request.GET.get('noteid',0))
     note = Note.objects.all()
-
+    sort_by = request.GET.get('sort_by', 'title')
+    if sort_by == 'title_asc':
+        note = Note.objects.order_by('title')
+    elif sort_by == 'title_desc':
+        note = Note.objects.order_by('-title')
+    elif sort_by == 'created_by_asc':
+        note = Note.objects.order_by('created_at')
+    elif sort_by == 'created_by_desc':
+        note = Note.objects.order_by('-created_at')
     if request.method == 'POST':
         noteid = int(request.POST.get('noteid',0))
         title = request.POST.get('title')
@@ -22,11 +30,11 @@ def editor(request):
             document.content = content
             document.save()
 
-            return redirect('/notes/?noteid=%i' % noteid)
+            return redirect('/notes/?noteid=%i&sort_by=%s' % (noteid, sort_by))
         else: 
             document = Note.objects.create(title=title, content=content)
 
-            return redirect('/notes/?noteid=%i' % document.id)
+            return redirect('/notes/?noteid=%i&sort_by=%s' % (document.id,sort_by))
 
     if noteid > 0:
         document = Note.objects.get(pk=noteid)
@@ -37,9 +45,55 @@ def editor(request):
         'noteid' : noteid,
         'note' : note,
         'document' : document,
+        'sort_by' : sort_by,
     }
     return render(request, 'notes/editor.html',context)                 
 
+def home_calendar_view(request):
+    all_classes = Class.objects.all()
+    context = {
+        'classes' : all_classes,
+    }
+    return render(request, "notes/calendar.html", context)
+
+def view_meeting_by_date(request):
+    eventid = int(request.GET.get('event',0))
+    start = request.GET.get('start',0)
+    end = request.GET.get('end',0)
+    
+    
+    
+    return
+
+def view_classes(request):
+    classes = Class.objects.all()
+    classid = int(request.GET.get('classid',0))
+
+    if request.method == 'POST':
+        classid = int(request.POST.get('classid',0))
+        name = request.POST.get('name')
+        if classid > 0:
+            a_class = Class.objects.get(pk=classid) # Change document 
+            a_class.name = name
+            a_class.save()
+            return redirect('/classes/?classid=%i' % classid,)
+
+        else:
+            a_class = Class.objects.create
+            return redirect('/classes/?classid=%i' % a_class.id,)
+        
+
+    if classid > 0:
+        a_class = Class.objects.get(pk=classid) 
+    else: 
+        a_class = ''
+
+    context = {
+        'classes' : classes,
+        'classid' : classid,
+        'a_class' : a_class,
+    }
+    return render(request, "notes/view-classes.html", context)
 def home_calendar_view(request):
     all_classes = Class.objects.all()
     context = {
@@ -70,8 +124,8 @@ def view_class(request, classname):
 def delete_document(request, noteid):
     document = Note.objects.get(pk=noteid)
     document.delete()
-
-    return redirect('/notes/?noteid=0')
+    sort_by = request.GET.get('sort_by')
+    return redirect('/notes/?noteid=0&sort_by=%s' % sort_by)
 
 def add_class(request):
     if request.POST:

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 
 <html>
     <head>
@@ -24,7 +24,13 @@
         <section class="section">
             <div class="columns">
                 <div class="column is-2">
-
+                    <p class="menu-label"> Sort By </p>
+                    <aside class="menu">
+                        <select id="sort_by_select">
+                            <option value="title_asc">Title Ascending</option>
+                            <option value="title_desc">Title Descending</option>
+                        </select>
+                    </aside>
                     <aside class="menu">
                         <p class="menu-label">Notes</p>
 
@@ -80,5 +86,115 @@
                 </div>
             </div>
         </section>
+    </body>
+</html> -->
+
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Notes</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+    </head>
+
+    <body>
+        <nav class="navbar is-dark">
+            <div class="navbar-brand">
+                <a href="{% url 'notes:home_page' %}" class="navbar-item">Home</a>
+            </div>
+            <div class="navbar-menu">
+                <div class="navbar-end">
+                    <a href="{% url 'notes:editor'%}?noteid=0&sort_by={{ sort_by }}" class="navbar-item">New Note</a>
+                </div>
+            </div>
+        </nav>
+
+        <section class="section">
+            <div class="columns">
+                <div class="column is-2">
+                    <p class="menu-label">Sort By</p>
+                    <aside class="menu">
+                        <select id="sort_by_select">
+                            <option value="title_asc">Title Ascending</option>
+                            <option value="title_desc">Title Descending</option>
+                            <option value="created_by_asc">Created By Ascending</option>
+                            <option value="created_by_desc">Created By Descending</option>
+                        </select>
+                        <p class="menu-label">Notes</p>
+                        <ul class="menu-list">
+                            {% for note in note %}
+                            <li>
+                                <a href="{% url 'notes:editor'%}?noteid={{ note.id }}&sort_by={{ sort_by }}" id="note_link" sort_by="sort_by">{{note.title}}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </aside>
+                </div>
+
+                <div class="column is-10">
+                    <form method="post" action="{% url 'notes:editor'%}?noteid={{ noteid }}&sort_by={{ sort_by }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="noteid" value="{{noteid}}">
+                        <input type="hidden" name="sort_by" value="{{sort_by}}">
+                        <div class="field">
+                            <label class="label">
+                                Title
+                                {%if document%}
+                                <span class="has-text-grey-light" style="float:right">
+                                    Created at: {{ document.created_at|date:"m/d/Y"}} | 
+                                    Modified at: {{ document.modified_at|date:"m/d/Y"}}
+                                </span>
+                                {% endif %}
+                            </label>
+
+                            <div class="control">
+                                <input type="text" class="input" name="title" placeholder="Title"{% if note %} value="{{document.title}}" {% endif %}>
+                            </div>
+
+                        <div class="field">
+                            <label class="label">Content</label>
+
+                            <div class="control">
+                                <textarea class="textarea" name="content" placeholder="Content">{% if note %}{{document.content}}{% endif %}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button class="button is-primary">Save</button>
+                            </div>
+                            {% if document %}
+                            <div class="control">
+                                <a href="{% url 'notes:delete_document' document.id %}" class="button is-danger">Delete Note</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <script>
+            const selectElement = document.getElementById('sort_by_select');
+        
+            // Function to handle the change event on the select element
+            selectElement.addEventListener('change', function() {
+                // Get the selected value from the dropdown
+                const selectedValue = selectElement.value;
+        
+                // Redirect to the new URL with the selected sorting option
+                window.location.href = `{% url 'notes:editor' %}?noteid={{ noteid }}&sort_by=${selectedValue}`;
+            });
+        
+            // Set the selected option in the dropdown based on the sort_by value from the URL
+            const sort_by_from_url = "{{ sort_by }}";
+            if (sort_by_from_url) {
+                selectElement.value = sort_by_from_url;
+            }
+        </script>
+        
     </body>
 </html>
