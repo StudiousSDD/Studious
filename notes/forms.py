@@ -43,3 +43,13 @@ class AddEvent(ModelForm):
         labels = {
             'end_recurring_period': _("End Repeat"),
         }
+
+class ImportEvent(ModelForm):
+    file = forms.FileField()
+    class Meta:
+        model = Event
+        fields = ['calendar', 'color_event', 'file']
+        widgets = {
+            'color_event': forms.TextInput(attrs={'type': 'color'}),
+        }
+        

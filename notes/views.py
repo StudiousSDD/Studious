@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
 
+from icalendar import Calendar
+
 from .models import Note, Class, Lecture
-from .forms import AddClass,AddEvent
+from .forms import AddClass,AddEvent,ImportEvent
 
 from schedule.models.events import Event, Occurrence
 from schedule.models.rules import Rule
@@ -107,6 +109,31 @@ def add_event(request):
         title = form.cleaned_data["title"]
         return redirect('/class/{}'.format(title))
     return render(request, "notes/add_event.html",{'form': AddEvent})
+
+def import_class(request):
+    if request.POST:
+        form = ImportEvent(request.POST,request.FILES)
+        if form.is_valid():
+            data = request.FILES['file'].read()
+            cal = Calendar.from_ical(data)
+            made = []
+            for component in cal.walk():
+                if component.name == "VEVENT" and component.get('summary') not in made:
+                    made.append(component.get('summary'))
+                    event = Event.objects.create(   title = component.get('summary'),
+                                                    start = component.decoded('dtstart'),
+                                                    end = component.decoded('dtend'),
+                                                    calendar = form.cleaned_data['calendar'], 
+                                                    color_event = form.cleaned_data['color_event'],
+                                                    end_recurring_period = component.get('rrule').get('until')[0],
+                                                    rule = create_rule(component.get('summary'), component.get('rrule').get('BYDAY')),      
+                                                ) 
+                    create_class_from_event(event)
+            return redirect('/class/{}'.format(made[0]))
+            # return redirect("/")
+            # return redirect('/class/')
+    return render(request, "notes/import_class.html",{'form': ImportEvent})
+
 
 def delete_class(request, classid):
     a_class = Class.objects.get(pk=classid)
