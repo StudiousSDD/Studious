@@ -1,0 +1,29 @@
+{% extends "base_generic.html" %}
+{% load scheduletags %}
+
+{% load static %}
+{% block content %}
+
+<h1>Import a Class</h1>
+
+<br>
+
+<form method="POST" action="{% url 'notes:import_class' %}" enctype="multipart/form-data">
+   
+  {% csrf_token %}
+  
+  {% for hidden in form.hidden_fields %}
+    {{ hidden }}
+  {% endfor %}
+
+  {% for field in form.visible_fields %}
+    {{ field.errors }}
+    <div class="fieldWrapper input-group mb-3">
+      <span class="input-group-text">{{ field.label_tag }}</span>
+         {{ field }}
+    </div>
+  {% endfor %}
+
+  <button>Submit</button>
+
+{% endblock %}

@@ -9,6 +9,8 @@ urlpatterns = [
     path("", views.home_calendar_view, name="home_page"),
     path("class/<int:classid>/delete", views.delete_class, name="delete_class"),
     path('delete_document/<int:noteid>/', views.delete_document, name='delete_document'),
+
+    path('import_class/', views.import_class, name='import_class'),
     path('notes/', views.editor, name='editor'),
     path('add_class/', views.add_class, name='add_class'),
     path('add_event/', views.add_event, name='add_event'),
