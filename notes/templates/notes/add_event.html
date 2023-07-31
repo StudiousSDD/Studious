@@ -6,7 +6,7 @@
 
 <h1>Add a Class</h1>
 
-<form method="POST" action="{% url 'add_event' %}" enctype="multipart/form-data">
+<form method="POST" action="{% url 'notes:add_event' %}" enctype="multipart/form-data">
    
   {% csrf_token %}
   

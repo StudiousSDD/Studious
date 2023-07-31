@@ -1,5 +1,5 @@
 
-<form method="POST" action="{% url 'add_class' %}" enctype="multipart/form-data">
+<form method="POST" action="{% url 'notes:add_class' %}" enctype="multipart/form-data">
     {% csrf_token %}
     {{form}}
    <button>Submit</button>

@@ -25,10 +25,10 @@ from notes import views
 urlpatterns = [
     path("", include("notes.urls")),
     path('admin/', admin.site.urls),
-    path('notes/', views.editor, name='editor'),
-    path('class/', views.view_class,name='view_class'),
-    path('add_class/', views.add_class,name='add_class'),
-    path('add_event/', views.add_event,name='add_event'),
+    # path('notes/', views.editor, name='editor'),
+    # path('class/', views.view_class,name='view_class'),
+    # path('add_class/', views.add_class,name='add_class'),
+    # path('add_event/', views.add_event,name='add_event'),
     path('schedule/', include("schedule.urls")),
-    path('meeting/', views.view_meeting_by_date, name='view_meeting_by_date'),
+    # path('meeting/', views.view_meeting_by_date, name='view_meeting_by_date'),
 ]
