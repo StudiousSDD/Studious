@@ -45,9 +45,19 @@
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
           },
-          events: {
-            url: '/schedule/api/occurrences?calendar_slug={{user.username}}',
-          },
+          eventSources: [
+            {
+              url: "{% url 'notes:eventapi' %}",
+              method: 'GET',
+              extraParams: {
+                calendar_slug: '{{user.username}}',
+
+              },
+              failure: function() {
+                alert('There was an error while fetching events!');
+              }
+            }
+          ],
           eventClick: function(info) {
             window.open( '/class/' + info.event.title, target="_self")
           },

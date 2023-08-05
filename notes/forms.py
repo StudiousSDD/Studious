@@ -34,10 +34,9 @@ class AddEvent(ModelForm):
         model = Event
         fields = ['title','start','end','calendar','end_recurring_period',]
         widgets = {
-            'start': DateTimeInput(),
-            'end': DateTimeInput(),
-            'end_recurring_period': DateTimeInput(),
-            'calendar': forms.HiddenInput(),
+            'start': forms.TextInput(attrs={'type': 'datetime-local'}),
+            'end': forms.TextInput(attrs={'type': 'datetime-local'}),
+            'end_recurring_period': forms.TextInput(attrs={'type': 'date'}),
         }
         labels = {
             'end_recurring_period': _("End Repeat"),
@@ -51,7 +50,6 @@ class ImportEvent(ModelForm):
         widgets = {
             'calendar': forms.HiddenInput(),
         }
-
 class EditEventForm(ModelForm):    
     def __init__(self, *args, **kwargs):
         hue = kwargs.pop('hue', None)

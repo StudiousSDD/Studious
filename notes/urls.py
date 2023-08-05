@@ -11,6 +11,8 @@ urlpatterns = [
     path("class/<int:classid>/edit", views.edit_class, name="edit_class"),
     path('delete_document/<int:noteid>/', views.delete_document, name='delete_document'),
 
+    path('eventapi', views.occurrences, name="eventapi"),
+
     path('import_class/', views.import_class, name='import_class'),
     path('notes/', views.editor, name='editor'),
     path('add_class/', views.add_class, name='add_class'),

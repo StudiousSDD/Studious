@@ -271,3 +271,24 @@ def create_class_from_event(event):
     class_name = event.title
     class_object = Class.objects.create(name=class_name, calendar_event=event)
     class_object.save() 
+    
+def occurrences(request):
+    """
+    ?calendar_slug=main-calendar
+    &start=2023-07-30T00:00:00-04:00
+    &end=2023-09-10T00:00:00-04:00
+    
+    start=2023-07-30T00:00:00Z
+    &end=2023-09-10T00:00:00Z
+    &timeZone=UTC
+    
+    America%2FNew_York
+    &timeZone=UTC'
+    """
+    
+    start = request.GET.get("start").rstrip('Z')
+    end = request.GET.get("end").rstrip('Z')
+    timezone = request.GET.get("timeZone")
+    calendar_slug = request.GET.get("calendar_slug")
+    
+    return redirect(f'/schedule/api/occurrences?calendar_slug={calendar_slug}&start={start}&end={end}&timezone={timezone}')
