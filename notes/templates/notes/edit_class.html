@@ -11,7 +11,7 @@
 
 <h1>Edit Class</h1>
 
-<form method="POST" action="{% url 'notes:add_event' %}" enctype="multipart/form-data">
+<form method="POST" action="{% url 'notes:edit_class' classid %}" enctype="multipart/form-data">
    
   {% csrf_token %}
   

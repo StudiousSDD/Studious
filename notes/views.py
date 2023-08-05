@@ -178,7 +178,7 @@ def add_event(request):
     if request.POST:
         form = AddEvent(request.POST,request.FILES)
         if form.is_valid():
-            event = form.save()
+            event = form.save(commit=False)
             
             repeat = form.cleaned_data["repeat"]
             rule = create_rule(event.title, repeat)
@@ -225,29 +225,29 @@ def delete_class(request, classid):
     return redirect('/')
 
 def edit_class(request, classid):
+    obj = get_object_or_404(Class, id=classid)
+    event = obj.calendar_event
+
     if request.method == "POST":
-        form = EditEventForm(request.POST)
+        form = EditEventForm(request.POST, instance=event)
         if form.is_valid():
-            classobj = get_object_or_404(Class, id=classid)
-            event = form.save()
-            classobj.name = event.title
+            event = form.save(commit=False)
             
             hue = form.cleaned_data["color"]
             event.color_event = hue_to_pastel(hue)
             
             event.save()
-            classobj.save()
-            
-            return redirect('/class/{}'.format(event.title))
 
-    # if a GET (or any other method) we'll create a blank form
+            obj.name = event.title
+            obj.save()
+            
+            return redirect(f'/class/{event.title}')
+
     else:
-        obj = get_object_or_404(Class, id=classid)
-        event = obj.calendar_event
         hue = hex_to_hue(event.color_event)
         form = EditEventForm(instance=event, hue=hue)
 
-    return render(request, "notes/edit_class.html", {"form": form})
+    return render(request, "notes/edit_class.html", {"form": form, "classid": classid})
     
 
 

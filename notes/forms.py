@@ -14,10 +14,6 @@ days_of_week = [
     ("SU", "Sunday"),
 ]
 
-
-class DateTimeInput(forms.DateTimeInput):
-    input_type = 'datetime_local'
-
 class AddClass(ModelForm):
     name = forms.TextInput()
     class Meta:
@@ -50,16 +46,15 @@ class ImportEvent(ModelForm):
         widgets = {
             'calendar': forms.HiddenInput(),
         }
+        
 class EditEventForm(ModelForm):    
     def __init__(self, *args, **kwargs):
         hue = kwargs.pop('hue', None)
         super(EditEventForm, self).__init__(*args, **kwargs)
-        if hue:
-            color_widget = forms.TextInput(attrs={'type': 'range', 'min': 0, 'max': 359, 'step': 1, 'value': hue, 'class': 'slider'})
-            self.fields["color"] = forms.IntegerField(min_value=0, max_value=359, widget=color_widget)
-        else:
-            color_widget = forms.TextInput(attrs={'type': 'range', 'min': 0, 'max': 359, 'step': 1, 'value': 180, 'class': 'slider'})
-            self.fields["color"] = forms.IntegerField(min_value=0, max_value=359, widget=color_widget)
+        if not hue:
+            hue = 180
+        color_widget = forms.TextInput(attrs={'type': 'range', 'min': 0, 'max': 359, 'step': 1, 'value': hue, 'class': 'slider'})
+        self.fields["color"] = forms.IntegerField(min_value=0, max_value=359, widget=color_widget)
             
 
     class Meta: 
