@@ -16,6 +16,19 @@
         <a class="navbar-brand" href="{% url 'notes:home_page' %}">
           <img src="{% static 'images/MainLogo.png' %}" alt="" width="auto" height="64px">
         </a>
+        <div class="d-flex flex-row-reverse bd-highlight">
+        {% if user.is_authenticated %}
+          <div class="p-2 bd-highlight">
+            <a href="{% url 'logout' %}" class="btn btn-danger">Log out</a>
+          </div>
+          {% else %}
+          <div class="p-2 bd-highlight">
+            <a href="{% url 'login' %}" class="btn btn-primary">Log in</a>
+          </div>
+          <div class="p-2 bd-highlight">
+            <a href="{% url 'accounts:signup' %}" class="btn btn-secondary">Sign up</a>
+          </div>
+        {% endif %}
       </div>
     </nav>
     <div class="container-lg">

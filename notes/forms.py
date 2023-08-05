@@ -1,8 +1,19 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, Form
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from .models import Class 
 from schedule.models.events import Event 
+
+days_of_week = [
+    ("MO", "Monday"),
+    ("TU", "Tuesday"),
+    ("WE", "Wednesday"),
+    ("TH", "Thursday"),
+    ("FR", "Friday"),
+    ("SA", "Saturday"),
+    ("SU", "Sunday"),
+]
+
 
 class DateTimeInput(forms.DateTimeInput):
     input_type = 'datetime_local'
@@ -14,31 +25,19 @@ class AddClass(ModelForm):
         fields = ['name']
 
 class AddEvent(ModelForm):
-    days_of_week = [
-        ("MO", "Monday"),
-        ("TU", "Tuesday"),
-        ("WE", "Wednesday"),
-        ("TH", "Thursday"),
-        ("FR", "Friday"),
-        ("SA", "Saturday"),
-        ("SU", "Sunday"),
-    ]
+    color_widget  = forms.TextInput(attrs={'type': 'range', 'min': 0, 'max': 359, 'step': 1, 'class': 'slider'})
+    color = forms.IntegerField(min_value=0, max_value=359, widget=color_widget)
     
-    # title = forms.TextInput()
-    # start = forms.DateTimeField()
-    # end = forms.TextInput()
-    # calendar = forms.TextInput() 
-    # color_event = forms.TextInput() 
     repeat = forms.MultipleChoiceField(choices=days_of_week, widget=forms.CheckboxSelectMultiple())
     
     class Meta: 
         model = Event
-        fields = ['title','start','end','calendar','color_event','end_recurring_period']
+        fields = ['title','start','end','calendar','end_recurring_period',]
         widgets = {
             'start': DateTimeInput(),
             'end': DateTimeInput(),
             'end_recurring_period': DateTimeInput(),
-            'color_event': forms.TextInput(attrs={'type': 'color'}),
+            'calendar': forms.HiddenInput(),
         }
         labels = {
             'end_recurring_period': _("End Repeat"),
@@ -48,8 +47,26 @@ class ImportEvent(ModelForm):
     file = forms.FileField()
     class Meta:
         model = Event
-        fields = ['calendar', 'color_event', 'file']
+        fields = ['calendar', 'file']
         widgets = {
-            'color_event': forms.TextInput(attrs={'type': 'color'}),
+            'calendar': forms.HiddenInput(),
         }
-        
+
+class EditEventForm(ModelForm):    
+    def __init__(self, *args, **kwargs):
+        hue = kwargs.pop('hue', None)
+        super(EditEventForm, self).__init__(*args, **kwargs)
+        if hue:
+            color_widget = forms.TextInput(attrs={'type': 'range', 'min': 0, 'max': 359, 'step': 1, 'value': hue, 'class': 'slider'})
+            self.fields["color"] = forms.IntegerField(min_value=0, max_value=359, widget=color_widget)
+        else:
+            color_widget = forms.TextInput(attrs={'type': 'range', 'min': 0, 'max': 359, 'step': 1, 'value': 180, 'class': 'slider'})
+            self.fields["color"] = forms.IntegerField(min_value=0, max_value=359, widget=color_widget)
+            
+
+    class Meta: 
+        model = Event
+        fields = ['title','calendar',]
+        widgets = {
+            'calendar': forms.HiddenInput(),
+        }

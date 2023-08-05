@@ -80,7 +80,9 @@
       
       <h1>{{classid.name}}</h1>
       <div class = "col-5">
-        <a href="{% url 'notes:delete_class' classid.id %}" class="button is-danger"><i class="fa-solid fa-trash" style="color: maroon"></i></a>
+        <a href="{% url 'notes:edit_class' classid.id %}"><i class="fa-solid fa-gear"></i></a>
+        <a href="{% url 'notes:delete_class' classid.id %}"><i class="fa-solid fa-trash" style="color: maroon"></i></a>
+
       </div>
       {% for l in classid.lecture_set.all %}
       <div class="row border-top">

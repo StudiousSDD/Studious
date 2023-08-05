@@ -16,16 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-# from notes.views import editor
-# from notes.views import view_classes
-# from notes.views import add_class
+from . import views
 
-from notes import views
-
+app_name = "accounts"
 urlpatterns = [
-    path("", include("notes.urls")),
-    path('admin/', admin.site.urls),
-    path('schedule/', include("schedule.urls")),
-    path('accounts/', include('accounts.urls')),
-    path('accounts/', include('django.contrib.auth.urls')),
+    path("signup/", views.SignUpView.as_view(), name="signup"),
 ]

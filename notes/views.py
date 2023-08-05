@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect, HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 
 from icalendar import Calendar
+import colorsys, random, math
 
 from .models import Note, Class, Lecture
-from .forms import AddClass,AddEvent,ImportEvent
+from .forms import AddClass,AddEvent,ImportEvent,EditEventForm
 
 from schedule.models.events import Event, Occurrence
 from schedule.models.rules import Rule
@@ -96,11 +97,15 @@ def view_classes(request):
         'a_class' : a_class,
     }
     return render(request, "notes/view-classes.html", context)
+
 def home_calendar_view(request):
-    all_classes = Class.objects.all()
-    context = {
-        'classes' : all_classes,
-    }
+    if (request.user.is_authenticated):
+        all_classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id)
+        context = {
+            'classes' : all_classes,
+        }
+    else:
+        context = None
     return render(request, "notes/calendar.html", context)
 
 def view_meeting_by_date(request):
@@ -113,14 +118,17 @@ def view_meeting_by_date(request):
     return
 
 def view_class(request, classname):
-    classes = Class.objects.all()
-    classid = classes.get(name=classname)
+    if (request.user.is_authenticated):
+        classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id)
+        classid = classes.get(name=classname)
 
 
-    context = {
-        'classes' : classes,
-        'classid' : classid,
-    }
+        context = {
+            'classes' : classes,
+            'classid' : classid,
+        }
+    else:
+        context = None
     return render(request, "notes/view-class.html", context)
 
 def delete_document(request, noteid):
@@ -150,14 +158,35 @@ def create_event(form):
     create_class_from_event(event)
     return event
 
+def random_pastel():
+    random.seed()
+    hue = random.randrange(360)
+    return hue_to_pastel(hue)
+
+def hue_to_pastel(hue):
+    color = colorsys.hsv_to_rgb(hue / 360, 0.4, 1.0)
+    r, g, b = color[0], color[1], color[2]
+    return '#%02x%02x%02x' % (int(r * 255), int(g * 255), int(b * 255))
+
+def hex_to_hue(hex):
+    hex = hex.lstrip('#')
+    rgb = tuple(int(hex[i:i+2], 16) for i in (0, 2, 4))
+    hsl = colorsys.rgb_to_hls(rgb[0], rgb[1], rgb[2])
+    return math.floor(hsl[0] * 360)
+
 def add_event(request):
     if request.POST:
         form = AddEvent(request.POST,request.FILES)
         if form.is_valid():
             event = form.save()
+            
             repeat = form.cleaned_data["repeat"]
             rule = create_rule(event.title, repeat)
             event.rule = rule
+            
+            hue = form.cleaned_data["color"]
+            event.color_event = hue_to_pastel(hue)
+            
             event.save()
             create_class_from_event(event)
         title = form.cleaned_data["title"]
@@ -178,14 +207,12 @@ def import_class(request):
                                                     start = component.decoded('dtstart'),
                                                     end = component.decoded('dtend'),
                                                     calendar = form.cleaned_data['calendar'], 
-                                                    color_event = form.cleaned_data['color_event'],
+                                                    color_event = random_pastel(),
                                                     end_recurring_period = component.get('rrule').get('until')[0],
                                                     rule = create_rule(component.get('summary'), component.get('rrule').get('BYDAY')),      
                                                 ) 
                     create_class_from_event(event)
             return redirect('/class/{}'.format(made[0]))
-            # return redirect("/")
-            # return redirect('/class/')
     return render(request, "notes/import_class.html",{'form': ImportEvent})
 
 
@@ -196,6 +223,33 @@ def delete_class(request, classid):
     a_event.delete()
 
     return redirect('/')
+
+def edit_class(request, classid):
+    if request.method == "POST":
+        form = EditEventForm(request.POST)
+        if form.is_valid():
+            classobj = get_object_or_404(Class, id=classid)
+            event = form.save()
+            classobj.name = event.title
+            
+            hue = form.cleaned_data["color"]
+            event.color_event = hue_to_pastel(hue)
+            
+            event.save()
+            classobj.save()
+            
+            return redirect('/class/{}'.format(event.title))
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        obj = get_object_or_404(Class, id=classid)
+        event = obj.calendar_event
+        hue = hex_to_hue(event.color_event)
+        form = EditEventForm(instance=event, hue=hue)
+
+    return render(request, "notes/edit_class.html", {"form": form})
+    
+
 
 def create_rule(ename, rep):
     rrname = (ename + '_repeat')

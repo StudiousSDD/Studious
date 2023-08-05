@@ -1,0 +1,42 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+  {% if form.errors %}
+    <p>Your username and password didn't match. Please try again.</p>
+  {% endif %}
+
+  {% if next %}
+    {% if user.is_authenticated %}
+      <p>Your account doesn't have access to this page. To proceed,
+      please login with an account that has access.</p>
+    {% else %}
+      <p>Please login to see this page.</p>
+    {% endif %}
+  {% endif %}
+
+  <h2>Sign up</h2>
+  <form method="post">
+    {% csrf_token %}
+  
+    {% for hidden in form.hidden_fields %}
+      {{ hidden }}
+    {% endfor %}
+  
+    {% for field in form.visible_fields %}
+      {{ field.errors }}
+      <div class="fieldWrapper input-group mb-3">
+        {{ field.errors }}
+        <span class="input-group-text">{{ field.label_tag }}</span>
+           {{ field }}
+           
+      </div>
+      {% if field.help_text %}
+        <p class="help">{{ field.help_text|safe }}</p>
+      {% endif %}
+    {% endfor %}
+  
+
+    <button type="submit" class="btn btn-success">Sign Up</button>
+  </form>
+{% endblock %}

@@ -13,7 +13,11 @@
   {% csrf_token %}
   
   {% for hidden in form.hidden_fields %}
-    {{ hidden }}
+    {% if hidden.id_for_label == "id_calendar" %}
+      <input type="hidden" name="calendar" id="id_calendar" value="{{user.profile.calendar.id}}">
+    {% else %}
+      {{ hidden }}
+    {% endif %}
   {% endfor %}
 
   {% for field in form.visible_fields %}
