@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import date
 from django.utils import timezone
+from ckeditor.widgets import CKEditorWidget
 
 from schedule.models.events import Event, Occurrence
 
@@ -41,3 +42,13 @@ class Note(models.Model):
 
     def __str__(self):
         return self.lecture.__str__() + " " + self.title
+
+class ArchivedNote(models.Model):
+    lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE, null=True)
+    
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    archived_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title.__str__() 

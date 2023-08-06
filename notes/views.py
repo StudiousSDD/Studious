@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from icalendar import Calendar
 import colorsys, random, math
 
-from .models import Note, Class, Lecture
+from .models import Note, Class, Lecture, ArchivedNote
 from .forms import AddClass,AddEvent,ImportEvent,EditEventForm
 
 from schedule.models.events import Event, Occurrence
@@ -13,6 +13,7 @@ from schedule.models.rules import Rule
 def editor(request):
     noteid = int(request.GET.get('noteid',0))
     note = Note.objects.all()
+    archived_notes = ArchivedNote.objects.all()
     sort_by = request.GET.get('sort_by', 'title')
     if sort_by == 'title_asc':
         note = Note.objects.order_by('title')
@@ -49,6 +50,7 @@ def editor(request):
         'note' : note,
         'document' : document,
         'sort_by' : sort_by,
+        'archived_notes' : archived_notes
     }
     return render(request, 'notes/editor.html',context)                 
 
@@ -131,11 +133,63 @@ def view_class(request, classname):
         context = None
     return render(request, "notes/view-class.html", context)
 
-def delete_document(request, noteid):
-    document = Note.objects.get(pk=noteid)
+# def delete_document(request, noteid):
+#     document = get_object_or_404(Note,pk=noteid)
+#     #Archiving the document 
+#     archived_document = ArchivedNote(
+#         lecture = document.lecture,
+#         title = document.title,
+#         content = document.content,
+#     )
+
+#     archived_document.save() 
+
+#     document.delete()
+#     sort_by = request.GET.get('sort_by')
+#     return redirect('/notes/?noteid=0&sort_by=%s' % sort_by)
+
+def archive_document(request, noteid):
+    document = get_object_or_404(Note,pk=noteid)
+    #Archiving the document 
+    archived_document = ArchivedNote(
+        lecture = document.lecture,
+        title = document.title,
+        content = document.content,
+    )
+
+    archived_document.save() 
+
     document.delete()
     sort_by = request.GET.get('sort_by')
     return redirect('/notes/?noteid=0&sort_by=%s' % sort_by)
+
+def restore_archived_note(request,noteid):
+    document = get_object_or_404(ArchivedNote,pk=noteid)
+    #Archiving the document 
+    note = Note(
+        lecture = document.lecture,
+        title = document.title,
+        content = document.content,
+    )
+
+    note.save() 
+
+    document.delete()
+    sort_by = request.GET.get('sort_by')
+    return redirect(f'/notes/?noteid={note.id}&sort_by={sort_by}')
+
+# def archived_note_view(request):
+#     archived_notes = ArchivedNote.objects.all()
+#     return render(request,'notes/editor.html', {'archived_notes': archived_notes})
+
+def delete_archived_note(request, noteid):
+    if request.method == 'POST':
+        sort_by = request.GET.get('sort_by', 'title')
+        note = get_object_or_404(ArchivedNote, id=noteid)
+        note.delete()
+        return redirect(f'/notes/?noteid=0&sort_by={sort_by}')
+    else:
+        return render(request,'editor.html')
 
 def add_class(request):
     if request.POST:

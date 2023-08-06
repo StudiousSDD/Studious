@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'fontawesomefree',
     'schedule',
     'accounts',
+    'ckeditor',
 ]
 
 MIDDLEWARE = [
