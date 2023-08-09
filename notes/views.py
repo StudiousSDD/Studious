@@ -65,22 +65,7 @@ def editor(request, lectureid):
         'archived_notes' : archived_notes
     }
     return render(request, 'notes/editor.html',context)                 
-# heh?
-def home_calendar_view(request):
-    all_classes = Class.objects.all()
-    context = {
-        'classes' : all_classes,
-    }
-    return render(request, "notes/calendar.html", context)
-# heh?
-def view_meeting_by_date(request):
-    eventid = int(request.GET.get('event',0))
-    start = request.GET.get('start',0)
-    end = request.GET.get('end',0)
-    
-    
-    
-    return
+
 # send only the classes associated with this account to be displayed on the home page
 def home_calendar_view(request):
     if (request.user.is_authenticated):
@@ -91,15 +76,7 @@ def home_calendar_view(request):
     else:
         context = None
     return render(request, "notes/calendar.html", context)
-# unfinished
-def view_meeting_by_date(request):
-    eventid = int(request.GET.get('event',0))
-    start = request.GET.get('start',0)
-    end = request.GET.get('end',0)
-    
-    # TODO: Implement this. Needs to find the Lecture and Occurrence (link?)
-    
-    return
+
 # find the correct class to display (as well as all other classes of this account for the side bar)
 def view_class(request, classid):
     if (request.user.is_authenticated):
