@@ -14,11 +14,13 @@ urlpatterns = [
     path('eventapi', views.occurrences, name="eventapi"),
 
     path('import_class/', views.import_class, name='import_class'),
-    path('notes/', views.editor, name='editor'),
+    path('notes/<int:lectureid>', views.editor, name='editor'),
     path('delete_archived_note/<int:noteid>/', views.delete_archived_note, name='delete_archived_note'),
     path('restore_archived_note/<int:noteid>/', views.restore_archived_note, name='restore_archived_note'),
 
     path('add_class/', views.add_class, name='add_class'),
     path('add_event/', views.add_event, name='add_event'),
-    path('class/<str:classname>/', views.view_class, name='view_class'),
+    path('class/<str:classid>/', views.view_class, name='view_class'),
+
+    path('create_lecture/', views.create_lecture, name='create_lecture'),
 ]

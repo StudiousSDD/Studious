@@ -21,12 +21,12 @@ class Class(models.Model):
 
 class Lecture(models.Model):
     occurrence = models.ForeignKey(Occurrence, on_delete=models.CASCADE, null=True)
-    event = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
+    cls = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
 
-    meeting_number = models.IntegerField(default=0)
+    lecture_number = models.IntegerField(default=0)
     def __str__(self):
-        title = " Meeting #{}"
-        return self.event.__str__() + title.format(self.meeting_number)
+        title = " Lecture #{}"
+        return self.cls.__str__() + title.format(self.lecture_number)
     
 
 class Note(models.Model):

@@ -9,7 +9,8 @@
       flex-wrap: wrap;
     }
     </style>
-  <!DOCTYPE html>
+
+<!DOCTYPE html>
 
 <html>
     <head>
@@ -26,7 +27,7 @@
             </div>
             <div class="navbar-menu">
                 <div class="navbar-end">
-                    <a href="{% url 'notes:editor'%}?noteid=0&sort_by={{ sort_by }}" class="navbar-item">New Note</a>
+                    <a href="{% url 'notes:editor' lecture.id %}?noteid=0&sort_by={{ sort_by }}" class="navbar-item">New Note</a>
                 </div>
             </div>
         </nav>
@@ -46,7 +47,7 @@
                         <ul class="menu-list">
                             {% for note in note %}
                             <li>
-                                <a href="{% url 'notes:editor'%}?noteid={{ note.id }}&sort_by={{ sort_by }}" id="note_link" sort_by="sort_by">{{note.title}}</a>
+                                <a href="{% url 'notes:editor' lecture.id %}?noteid={{ note.id }}&sort_by={{ sort_by }}" id="note_link" sort_by="sort_by">{{note.title}}</a>
                             </li>
                             {% endfor %}
                         </ul>
@@ -72,7 +73,7 @@
                 </div>
 
                 <div class="column is-10">
-                    <form method="post" action="{% url 'notes:editor'%}?noteid={{ noteid }}&sort_by={{ sort_by }}">
+                    <form method="post" action="{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by={{ sort_by }}">
                         {% csrf_token %}
                         <input type="hidden" name="noteid" value="{{noteid}}">
                         <input type="hidden" name="sort_by" value="{{sort_by}}">
@@ -124,7 +125,7 @@
                 const selectedValue = selectElement.value;
         
                 // Redirect to the new URL with the selected sorting option
-                window.location.href = `{% url 'notes:editor' %}?noteid={{ noteid }}&sort_by=${selectedValue}`;
+                window.location.href = `{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by=${selectedValue}`;
             });
         
             // Set the selected option in the dropdown based on the sort_by value from the URL

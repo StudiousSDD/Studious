@@ -84,25 +84,24 @@
         <a href="{% url 'notes:delete_class' classid.id %}"><i class="fa-solid fa-trash" style="color: maroon"></i></a>
 
       </div>
-      {% for l in classid.lecture_set.all %}
+      {% for lecture in classid.lecture_set.all %}
       <div class="row border-top">
         <div class = "col-11">
-          <h2>Lecture: {{l.meeting_number}}</h2>
+          <h2>Lecture: {{lecture.lecture_number}}</h2>
         </div>
       </div>
       <ul class="unstyled-list">
-        {% for n in l.note_set.all %}
-          <li><a href="{% url 'notes:editor' %}?noteid={{n.id}}">{{n.title}}</a></li>
+        {% for note in lecture.note_set.all %}
+          <li><a href="{% url 'notes:editor' lecture.id %}?noteid={{note.id}}">{{note.title}}</a></li>
         {% endfor %}
       </ul>
       <div class = "col-5">
-        <a href="{% url 'notes:editor' %}">New Note</a>
+        <a href="{% url 'notes:editor' lecture.id %}">New Note</a>
       </div>
       {% endfor %}
-      {% comment %} <div class = "col-11">
-        <h3><a href="{% url 'notes:editor' %}">New Lecture (not implemented)</a></h3>
-      </div> {% endcomment %}
-
+      <div class = "col-11">
+        <h3><a href="{% url 'notes:create_lecture' %}?classid={{classid}}">New Lecture</a></h3>
+      </div>
   </div>
 </div>
 {% endblock %}

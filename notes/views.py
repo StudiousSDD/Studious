@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponseRedirect
 
 from icalendar import Calendar
 import colorsys, random, math
@@ -10,19 +11,22 @@ from schedule.models.events import Event, Occurrence
 from schedule.models.rules import Rule
 # Create your views here.
 
-def editor(request):
+def editor(request, lectureid):
     noteid = int(request.GET.get('noteid',0))
-    note = Note.objects.all()
-    archived_notes = ArchivedNote.objects.all()
+
+    lec = Lecture.objects.get(id=lectureid)
+    note = lec.note_set.all()
+    archived_notes = lec.archivednote_set.all()
+
     sort_by = request.GET.get('sort_by', 'title')
     if sort_by == 'title_asc':
-        note = Note.objects.order_by('title')
+        note = note.order_by('title')
     elif sort_by == 'title_desc':
-        note = Note.objects.order_by('-title')
+        note = note.order_by('-title')
     elif sort_by == 'created_by_asc':
-        note = Note.objects.order_by('created_at')
+        note = note.order_by('created_at')
     elif sort_by == 'created_by_desc':
-        note = Note.objects.order_by('-created_at')
+        note = note.order_by('-created_at')
     if request.method == 'POST':
         noteid = int(request.POST.get('noteid',0))
         title = request.POST.get('title')
@@ -34,11 +38,11 @@ def editor(request):
             document.content = content
             document.save()
 
-            return redirect('/notes/?noteid=%i&sort_by=%s' % (noteid, sort_by))
+            return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (noteid, sort_by))
         else: 
-            document = Note.objects.create(title=title, content=content)
+            document = Note.objects.create(title=title, content=content, lecture=lec)
 
-            return redirect('/notes/?noteid=%i&sort_by=%s' % (document.id,sort_by))
+            return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (document.id,sort_by))
 
     if noteid > 0:
         document = Note.objects.get(pk=noteid)
@@ -46,6 +50,7 @@ def editor(request):
         document = ''
 
     context = {
+        'lecture' : lec,
         'noteid' : noteid,
         'note' : note,
         'document' : document,
@@ -70,36 +75,6 @@ def view_meeting_by_date(request):
     
     return
 
-def view_classes(request):
-    classes = Class.objects.all()
-    classid = int(request.GET.get('classid',0))
-
-    if request.method == 'POST':
-        classid = int(request.POST.get('classid',0))
-        name = request.POST.get('name')
-        if classid > 0:
-            a_class = Class.objects.get(pk=classid) # Change document 
-            a_class.name = name
-            a_class.save()
-            return redirect('/classes/?classid=%i' % classid,)
-
-        else:
-            a_class = Class.objects.create
-            return redirect('/classes/?classid=%i' % a_class.id,)
-        
-
-    if classid > 0:
-        a_class = Class.objects.get(pk=classid) 
-    else: 
-        a_class = ''
-
-    context = {
-        'classes' : classes,
-        'classid' : classid,
-        'a_class' : a_class,
-    }
-    return render(request, "notes/view-classes.html", context)
-
 def home_calendar_view(request):
     if (request.user.is_authenticated):
         all_classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id)
@@ -119,12 +94,10 @@ def view_meeting_by_date(request):
     
     return
 
-def view_class(request, classname):
+def view_class(request, classid):
     if (request.user.is_authenticated):
         classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id)
-        classid = classes.get(name=classname)
-
-
+        classid = Class.objects.get(name=classid)
         context = {
             'classes' : classes,
             'classid' : classid,
@@ -132,6 +105,31 @@ def view_class(request, classname):
     else:
         context = None
     return render(request, "notes/view-class.html", context)
+
+def create_lecture(request):
+    classid = request.GET.get('classid',0)
+    cls = Class.objects.get(name=classid)
+    eve = cls.calendar_event
+    lecnum = len(cls.lecture_set.all()) + 1
+
+    if (lecnum != 1):
+        time = cls.lecture_set.get(lecture_number = lecnum - 1).occurrence.start
+    else:
+        time = eve.start
+
+    generator = eve.occurrences_after(time)
+    while(1):
+        occurr = next(generator)
+        if (occurr.start > time):
+            break
+    occurr.save()
+    lec = Lecture.objects.create(
+        occurrence = occurr,
+        cls = cls,
+        lecture_number = lecnum,
+    )
+    lec.save()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 # def delete_document(request, noteid):
 #     document = get_object_or_404(Note,pk=noteid)
@@ -161,7 +159,7 @@ def archive_document(request, noteid):
 
     document.delete()
     sort_by = request.GET.get('sort_by')
-    return redirect('/notes/?noteid=0&sort_by=%s' % sort_by)
+    return redirect('/notes/{}?noteid=0&sort_by=%s' .format(document.lecture.id) % sort_by)
 
 def restore_archived_note(request,noteid):
     document = get_object_or_404(ArchivedNote,pk=noteid)
@@ -176,7 +174,7 @@ def restore_archived_note(request,noteid):
 
     document.delete()
     sort_by = request.GET.get('sort_by')
-    return redirect(f'/notes/?noteid={note.id}&sort_by={sort_by}')
+    return redirect(f'/notes/{document.lecture.id}?noteid={note.id}&sort_by={sort_by}')
 
 # def archived_note_view(request):
 #     archived_notes = ArchivedNote.objects.all()
@@ -186,8 +184,9 @@ def delete_archived_note(request, noteid):
     if request.method == 'POST':
         sort_by = request.GET.get('sort_by', 'title')
         note = get_object_or_404(ArchivedNote, id=noteid)
+        lectureid = note.lecture.id
         note.delete()
-        return redirect(f'/notes/?noteid=0&sort_by={sort_by}')
+        return redirect(f'/notes/{lectureid}?noteid=0&sort_by={sort_by}')
     else:
         return render(request,'editor.html')
 
@@ -269,7 +268,6 @@ def import_class(request):
             return redirect('/class/{}'.format(made[0]))
     return render(request, "notes/import_class.html",{'form': ImportEvent})
 
-
 def delete_class(request, classid):
     a_class = Class.objects.get(pk=classid)
     a_event = a_class.calendar_event
@@ -303,8 +301,6 @@ def edit_class(request, classid):
 
     return render(request, "notes/edit_class.html", {"form": form, "classid": classid})
     
-
-
 def create_rule(ename, rep):
     rrname = (ename + '_repeat')
     desc = rrname
