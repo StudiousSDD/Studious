@@ -3,7 +3,6 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from .models import Class, Note, Tag
 from schedule.models.events import Event 
-from tags.models import Tag
 
 days_of_week = [
     ("MO", "Monday"),
@@ -67,8 +66,9 @@ class EditEventForm(ModelForm):
 
 # allow users to select a tag or create a new tag for each note
 class NoteForm(forms.ModelForm):
-    tag = forms.ModelChoiceField(queryset=Tag.objects.all(), required=False, label="Select Existing Tag")
-    new_tag = forms.CharField(max_length=100, required=False, label="Create New Tag")
+    new_tag = forms.CharField(max_length=100, required=False, label="Create New Tag", widget=forms.TextInput(attrs={'placeholder': 'e.g., homework'}))
+    tag = forms.ModelChoiceField(queryset=Tag.objects.all(), required=False, label="Select Tag")
+    delete_tag = forms.BooleanField(required=False, label="Delete Tag")
 
     class Meta:
         model = Note

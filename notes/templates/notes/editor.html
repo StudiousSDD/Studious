@@ -47,7 +47,9 @@
                         <ul class="menu-list">
                             {% for note in note %}
                             <li>
-                                <a href="{% url 'notes:editor' lecture.id %}?noteid={{ note.id }}&sort_by={{ sort_by }}" id="note_link" sort_by="sort_by">{{note.title}}</a>
+                                <a href="{% url 'notes:editor' lecture.id %}?noteid={{ note.id }}&sort_by={{ sort_by }}" id="note_link" sort_by="sort_by">{{note.title}}
+                                    <span class="tag">{{ note.tag }}</span>
+                                </a>
                             </li>
                             {% endfor %}
                         </ul>
@@ -75,9 +77,6 @@
                 <div class="column is-10">
                     <form method="post" action="{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by={{ sort_by }}">
                         {% csrf_token %}
-                        {{ form.as_p }}
-                        {{ form.tag }}
-                        {{ form.new_tag }}
                         <input type="hidden" name="noteid" value="{{noteid}}">
                         <input type="hidden" name="sort_by" value="{{sort_by}}">
                         <div class="field">
@@ -94,6 +93,28 @@
                             <div class="control">
                                 <input type="text" class="input" name="title" placeholder="Title"{% if note %} value="{{document.title}}" {% endif %}>
                             </div>
+                        
+                        <!-- Creating or selecting tags -->
+                        <div class="field">
+                            <label class="label">Tags</label>                            
+                            <div class="control">
+                                {{ form.new_tag.label_tag }}
+                                {{ form.new_tag }}
+                            </div>
+
+                            <div class="control">
+                                {{ form.tag.label_tag }}
+                                {{ form.tag }}
+                            </div>
+                            
+                            <div class="control">
+                                {% if document.tag %}
+                                    Delete Tag:
+                                        <input type="checkbox" name="delete_tag" id="delete_tag">
+                                {% endif %}
+
+                            </div>
+                        </div>
 
                         <div class="field">
                             <label class="label">Content</label>

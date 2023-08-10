@@ -4,13 +4,11 @@ from django.http import HttpResponseRedirect
 from icalendar import Calendar
 import colorsys, random, math
 
-from .models import Note, Class, Lecture, ArchivedNote
+from .models import Note, Class, Lecture, ArchivedNote, Tag
 from .forms import AddClass, AddEvent, ImportEvent, EditEventForm, NoteForm
 
 from schedule.models.events import Event, Occurrence
 from schedule.models.rules import Rule
-
-from tags.models import Tag
 
 # Create your views here.
 
@@ -40,14 +38,38 @@ def editor(request, lectureid):
     document = None
     if noteid > 0:
         document = Note.objects.get(pk=noteid)
+
     
     # if it's a form submission, either create new note or update existing note 
     if request.method == 'POST':
         form = NoteForm(request.POST)
+        delete_tag = request.POST.get('delete_tag')
+
+        # if delete_tag == 'on' and document and document.tag:
+        #     selected_tag = form.cleaned_data['tag']
+        #     if selected_tag:
+        #         document.tag.delete()
+        #         document.tag = None
+
         if form.is_valid():
             title = form.cleaned_data['title']
             content = form.cleaned_data['content']
+            new_tag = form.cleaned_data['new_tag']
             tag = form.cleaned_data['tag']
+
+            if delete_tag == 'on' and document and tag:
+                tag_to_delete = Tag.objects.get(name=tag)
+                document.tag = None
+                tag_to_delete.delete()
+            
+            if new_tag:
+                tag, created = Tag.objects.get_or_create(name=new_tag)
+                # document.tag = tag
+            else: 
+                try:
+                    tag = Tag.objects.get(name=tag)
+                except Tag.DoesNotExist:
+                    tag = None
 
             # updates existing note
             if noteid > 0:
@@ -72,7 +94,6 @@ def editor(request, lectureid):
             form = NoteForm(initial=initial_data, instance=document)
         else:
             form = NoteForm()
-            # document = ''
 
     form = NoteForm(request.POST or None, instance=document)
 

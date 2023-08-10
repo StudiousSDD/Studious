@@ -5,10 +5,16 @@ from ckeditor.widgets import CKEditorWidget
 
 from schedule.models.events import Event, Occurrence
 
-from tags.models import Tag
 
 # Create your models here.
-    
+
+# to represent and manage tags 
+class Tag(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+        
 class Class(models.Model):
     calendar_event = models.OneToOneField(Event, on_delete=models.CASCADE, null=True)
 
@@ -56,9 +62,3 @@ class ArchivedNote(models.Model):
     def __str__(self):
         return self.title.__str__()
     
-# to represent and manage tags 
-class Tag(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
