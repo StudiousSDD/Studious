@@ -321,21 +321,50 @@ def create_class_from_event(event):
     class_name = event.title
     class_object = Class.objects.create(name=class_name, calendar_event=event)
     class_object.save() 
+    
+def outline_view(request, lectureid, noteid):
+    lec = Lecture.objects.get(id=lectureid)    
+    
+    # the set of all notes for the requested lecture
+    notes = lec.note_set.all()
+    # the set of all archived notes for the requested lecture
+    archived_notes = lec.archivednote_set.all()
+    
+    note = Note.objects.get(pk=noteid)
+    
+    outline = []
+    
+    for line in note.content.splitlines():
+        if (line[:4] == "<h1>" or 
+            line[:4] == "<h2>" or
+            line[:4] == "<h3>"):
+            new_line = line[:3] + " class=\"subtitle is-" + str(int(line[2]) + 3) + "\"" + line[3:]
+            outline.append(new_line)
+    
+    # notes can be sorted in different ways
+    sort_by = request.GET.get('sort_by', 'title')
+    if sort_by == 'title_asc':
+        note = note.order_by('title')
+    elif sort_by == 'title_desc':
+        note = note.order_by('-title')
+    elif sort_by == 'created_by_asc':
+        note = note.order_by('created_at')
+    elif sort_by == 'created_by_desc':
+        note = note.order_by('-created_at')
+
+    context = {
+        'lecture' : lec,
+        'note': note,
+        'outline' : outline,
+        'sort_by' : sort_by,
+        'notes' : notes,
+        'archived_notes' : archived_notes,
+    }
+    return render(request, 'notes/outline.html',context)                 
+
+    
 # translater between api calendar and visual calendar    
-def occurrences(request):
-    """
-    ?calendar_slug=main-calendar
-    &start=2023-07-30T00:00:00-04:00
-    &end=2023-09-10T00:00:00-04:00
-    
-    start=2023-07-30T00:00:00Z
-    &end=2023-09-10T00:00:00Z
-    &timeZone=UTC
-    
-    America%2FNew_York
-    &timeZone=UTC'
-    """
-    
+def occurrence_api(request):    
     start = request.GET.get("start").rstrip('Z')
     end = request.GET.get("end").rstrip('Z')
     timezone = request.GET.get("timeZone")
