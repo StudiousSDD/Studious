@@ -30,6 +30,7 @@ class Class(models.Model):
 class Lecture(models.Model):
     occurrence = models.ForeignKey(Occurrence, on_delete=models.CASCADE, null=True)
     cls = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     lecture_number = models.IntegerField(default=0)
     def __str__(self):
@@ -47,6 +48,7 @@ class Note(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    color = models.CharField(max_length=255)
 
     class Meta:
         ordering = ('title',) # Order by title alphabetically 

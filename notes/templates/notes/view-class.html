@@ -82,12 +82,19 @@
       <div class = "col-5">
         <a href="{% url 'notes:edit_class' classid.id %}"><i class="fa-solid fa-gear"></i></a>
         <a href="{% url 'notes:delete_class' classid.id %}"><i class="fa-solid fa-trash" style="color: maroon"></i></a>
-
+        <div class="class-list">
+          <label for="sort-by">Sort by:</label>
+          <select id="sort-by" name="sort-by">
+            <option value="latest" {% if sort_by == 'latest' %}selected{% endif %}>Latest</option>
+            <option value="earliest" {% if sort_by == 'earliest' %}selected{% endif %}>Earliest</option>
+          </select>
+        </div>
+        
       </div>
-      {% for lecture in classid.lecture_set.all %}
+      {% for lecture in lecture_queryset %}
       <div class="row border-top">
         <div class = "col-11">
-          <h2>Lecture: {{lecture.lecture_number}}</h2>
+          <h2>Lecture: {{lecture.lecture_number}} </h2>
         </div>
       </div>
       <ul class="unstyled-list">
@@ -104,4 +111,19 @@
       </div>
   </div>
 </div>
+
+<script>
+  const sortSelect = document.getElementById('sort-by');
+
+  sortSelect.addEventListener('change', function() {
+    const selectedValue = this.value;
+    const currentUrl = new URL(window.location.href);
+    
+    currentUrl.searchParams.set('sort_by', selectedValue);
+
+    window.location.href = currentUrl.toString();
+  });
+</script>
+
+
 {% endblock %}

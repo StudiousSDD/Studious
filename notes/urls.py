@@ -15,6 +15,7 @@ urlpatterns = [
 
     path('import_class/', views.import_class, name='import_class'),
     path('notes/<int:lectureid>', views.editor, name='editor'),
+    path('update_note_color/', views.update_note_color, name='update_note_color'),
     path('delete_archived_note/<int:noteid>/', views.delete_archived_note, name='delete_archived_note'),
     path('restore_archived_note/<int:noteid>/', views.restore_archived_note, name='restore_archived_note'),
 

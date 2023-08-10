@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
 from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 from icalendar import Calendar
 import colorsys, random, math
@@ -23,6 +25,7 @@ def editor(request, lectureid):
     # the set of all archived notes for the requested lecture
     archived_notes = lec.archivednote_set.all()
 
+
     # notes can be sorted in different ways
     sort_by = request.GET.get('sort_by', 'title')
     if sort_by == 'title_asc':
@@ -38,16 +41,18 @@ def editor(request, lectureid):
         noteid = int(request.POST.get('noteid',0))
         title = request.POST.get('title')
         content = request.POST.get('content')
+        color = request.POST.get('color')
         # if they are changing an existing note update all the fields
         if noteid > 0:
             document = Note.objects.get(pk=noteid) # Change document 
             document.title = title
             document.content = content
+            document.color = color
             document.save()
 
             return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (noteid, sort_by))
         else: 
-            document = Note.objects.create(title=title, content=content, lecture=lec)
+            document = Note.objects.create(title=title, content=content, lecture=lec, color=color)
 
             return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (document.id,sort_by))
 
@@ -81,14 +86,24 @@ def home_calendar_view(request):
 def view_class(request, classid):
     if (request.user.is_authenticated):
         classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id)
-        classid = Class.objects.get(name=classid)
+        class_instance = Class.objects.get(name=classid)
+
+        lecture_queryset = class_instance.lecture_set.all()
+        sort_by = request.GET.get('sort_by', 'latest')  # Default to sorting by latest
+        if sort_by == 'latest':
+            lecture_queryset = class_instance.lecture_set.order_by('-lecture_number')
+        elif sort_by == 'earliest':
+            lecture_queryset = class_instance.lecture_set.order_by('lecture_number')
         context = {
             'classes' : classes,
-            'classid' : classid,
+            'classid' : class_instance,
+            'sort_by' : sort_by,
+            'lecture_queryset' : lecture_queryset,
         }
     else:
         context = None
     return render(request, "notes/view-class.html", context)
+
 # creating a new lecture in a specific class
 def create_lecture(request):
     # get which class this is for from the request
@@ -342,3 +357,19 @@ def occurrences(request):
     calendar_slug = request.GET.get("calendar_slug")
     
     return redirect(f'/schedule/api/occurrences?calendar_slug={calendar_slug}&start={start}&end={end}&timezone={timezone}')
+
+def update_note_color(request):
+    if request.method == 'POST' and request.is_ajax():
+        color = request.POST.get('color', None)
+        if color:
+            note_id = request.session.get('noteid')  # Change this to your actual method of identifying the note
+            if note_id:
+                try:
+                    note = Note.objects.get(id=note_id)
+                    note.color = color
+                    note.save()
+                    return JsonResponse({'message': 'Note color updated successfully'})
+                except Note.DoesNotExist:
+                    return JsonResponse({'message': 'Note not found'}, status=404)
+
+    return JsonResponse({'message': 'Invalid request'}, status=400)
