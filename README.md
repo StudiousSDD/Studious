@@ -2,7 +2,7 @@
 
 ## Brawns for your Brains!
 
-This README is a work in progress, so 
+Studious is a note-taking website where you can view all your classes on a calendar and organize all your classes, lectures, and notes at once. 
 
 ### Development instructions
 
@@ -23,7 +23,7 @@ pip 23.1.2 from some/path/here/python/site-packages/pip (python 3.10)
 
 If not, you can install Python from [their website](https://www.python.org/) or pip from [here](https://pypi.org/project/pip/)
 
-It is recommended to have a decicated virtual environment for each project. You can follow the instructions provided [here](https://www.w3schools.com/django/django_create_virtual_environment.php) for help.
+It is recommended to have a dedicated virtual environment for each project. You can follow the instructions provided [here](https://www.w3schools.com/django/django_create_virtual_environment.php) for help.
 
 Once you have activated the environment (`env\Scripts\activate.bat` for Windows, `source env/bin/activate` for Mac/UNIX), run the following command to install all required dependencies for the project:
 

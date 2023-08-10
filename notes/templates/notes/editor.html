@@ -1,34 +1,81 @@
 {% load static %}
 <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
-  <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
-  <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
 
-  <style>
+<style>
     li.container {
-      display: flex;
-      flex-wrap: wrap;
+        display: flex;
+        flex-wrap: wrap;
     }
-    </style>
+</style>
 
 <!DOCTYPE html>
 
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Notes</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
-    </head>
 
-    <body>
-        <nav class="navbar is-dark">
-            <div class="navbar-brand">
-                <a href="{% url 'notes:home_page' %}" class="navbar-item">Home</a>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Notes</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+</head>
+
+<body>
+    <nav class="navbar is-dark">
+        <div class="navbar-brand">
+            <a href="{% url 'notes:home_page' %}" class="navbar-item"
+                style="background-color: {{ c.calendar_event.color_event }}">Home</a>
+
+        </div>
+        <div class="navbar-menu">
+            <div class="navbar-end">
+                <a href="{% url 'notes:editor' lecture.id %}?noteid=0&sort_by={{ sort_by }}" class="navbar-item">New
+                    Note</a>
             </div>
-            <div class="navbar-menu">
-                <div class="navbar-end">
-                    <a href="{% url 'notes:editor' lecture.id %}?noteid=0&sort_by={{ sort_by }}" class="navbar-item">New Note</a>
-                </div>
+        </div>
+    </nav>
+
+    <section class="section">
+        <div class="columns">
+            <div class="column is-2">
+                <p class="menu-label">Sort By</p>
+                <aside class="menu">
+                    <select id="sort_by_select">
+                        <option value="title_asc">Title Ascending</option>
+                        <option value="title_desc">Title Descending</option>
+                        <option value="created_by_asc">Created By Ascending</option>
+                        <option value="created_by_desc">Created By Descending</option>
+                    </select>
+                    <p class="menu-label">Notes</p>
+                    <ul class="menu-list">
+                        {% for note in note %}
+                        <li>
+                            <a href="{% url 'notes:editor' lecture.id %}?noteid={{ note.id }}&sort_by={{ sort_by }}"
+                                id="note_link" sort_by="sort_by">{{note.title}}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <p class="menu-label">Archived Notes</p>
+                    <ul class="menu-list">
+                        {% for n in archived_notes %}
+
+                        <li class="container">{{n.title}}
+                            <form method="post" action="{% url 'notes:delete_archived_note' n.id %}">
+                                {% csrf_token %}
+                                <button type="submit"
+                                    onclick="return confirm('Are you sure you want to delete this archived note?')">Delete</button>
+                            </form>
+                            <form method="post" action="{% url 'notes:restore_archived_note' n.id %}">
+                                {% csrf_token %}
+                                <button type="submit">Restore</button>
+                            </form>
+                        </li>
+
+
+                        {% endfor %}
+                    </ul>
+                </aside>
             </div>
         </nav>
 
@@ -76,6 +123,17 @@
 
                 <div class="column is-10">
                     <form method="post" action="{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by={{ sort_by }}">
+            <form method="post" action="{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by={{ sort_by }}">
+                {% csrf_token %}
+                <input type="hidden" name="noteid" value="{{ noteid }}">
+                <input type="hidden" name="sort_by" value="{{ sort_by }}">
+                
+                <!-- Add a color picker input -->
+                <input type="color" id="colorInput" name="color" value="{{ document.color }}" required>
+                <div class="column is-10" style="background-color: {{ document.color }}">
+    
+                    <form method="post"
+                        action="{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by={{ sort_by }}">
                         {% csrf_token %}
                         <input type="hidden" name="noteid" value="{{noteid}}">
                         <input type="hidden" name="sort_by" value="{{sort_by}}">
@@ -84,14 +142,15 @@
                                 Title
                                 {%if document%}
                                 <span class="has-text-grey-light" style="float:right">
-                                    Created at: {{ document.created_at|date:"m/d/Y"}} | 
+                                    Created at: {{ document.created_at|date:"m/d/Y"}} |
                                     Modified at: {{ document.modified_at|date:"m/d/Y"}}
                                 </span>
                                 {% endif %}
                             </label>
 
                             <div class="control">
-                                <input type="text" class="input" name="title" placeholder="Title"{% if note %} value="{{document.title}}" {% endif %}>
+                                <input type="text" class="input" name="title" placeholder="Title" {% if note %}
+                                    value="{{document.title}}" {% endif %}>
                             </div>
                         
                         <!-- Creating or selecting tags -->
@@ -116,95 +175,107 @@
                             </div>
                         </div>
 
-                        <div class="field">
-                            <label class="label">Content</label>
 
-                            <div class="control">
-                                <textarea class="textarea ckeditor" name="content" placeholder="Content">{% if note %}{{document.content}}{% endif %}</textarea>
-                            </div>
-                        </div>
+                            <div class="field">
+                                <label class="label">Content</label>
 
-                        <div class="field is-grouped">
-                            <div class="control">
-                                <button class="button is-primary">Save</button>
+                                <div class="control">
+                                    <textarea class="ckeditor" name="content"
+                                        placeholder="Content"> {% if note %}{{document.content}}{% endif %}</textarea>
+                                </div>
                             </div>
-                            {% if document %}
-                            <div class="control">
-                                <a href="{% url 'notes:archive_document' document.id %}" class="button is-danger archive-button">Archive Note</a>
+
+                            <div class="field is-grouped">
+                                <div class="control">
+                                    <button class="button is-primary">Save</button>
+                                </div>
+                                {% if document %}
+                                <div class="control">
+                                    <a href="{% url 'notes:archive_document' document.id %}"
+                                        class="button is-danger archive-button">Archive Note</a>
+                                </div>
+                                {% endif %}
+                                <div class="control">
+                                    <a href="{% url 'notes:outline' lecture.id document.id %}" class="button is-secondary">Outline</a>
+                                </div>
                             </div>
-                            {% endif %}
-                            
                         </div>
                     </form>
                 </div>
-            </div>
-        </section>
+            </form>
+        </div>
+    </section>
 
-        <script>
-            const selectElement = document.getElementById('sort_by_select');
-        
-            // Function to handle the change event on the select element
-            selectElement.addEventListener('change', function() {
-                // Get the selected value from the dropdown
-                const selectedValue = selectElement.value;
-        
-                // Redirect to the new URL with the selected sorting option
-                window.location.href = `{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by=${selectedValue}`;
-            });
-        
-            // Set the selected option in the dropdown based on the sort_by value from the URL
-            const sort_by_from_url = "{{ sort_by }}";
-            if (sort_by_from_url) {
-                selectElement.value = sort_by_from_url;
-            }
-        </script>
-        <script>
+    <script>
+        const selectElement = document.getElementById('sort_by_select');
+
+        // Function to handle the change event on the select element
+        selectElement.addEventListener('change', function () {
+            // Get the selected value from the dropdown
+            const selectedValue = selectElement.value;
+
+            // Redirect to the new URL with the selected sorting option
+            window.location.href = `{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by=${selectedValue}`;
+        });
+
+        // Set the selected option in the dropdown based on the sort_by value from the URL
+        const sort_by_from_url = "{{ sort_by }}";
+        if (sort_by_from_url) {
+            selectElement.value = sort_by_from_url;
+        }
+    </script>
+    <script>
         const archiveNoteButton = document.querySelector('.button.is-danger');
 
         if (archiveNoteButton) {
-          archiveNoteButton.addEventListener('click', function(event) {
-            event.preventDefault();
-      
-            // Show the confirmation prompt
-            if (window.confirm('Are you sure you want to archive this note?')) {
-              // If the user confirms, proceed with the deletion by redirecting to the delete URL
-              const archiveNoteUrl = archiveNoteButton.getAttribute('href');
-            window.location.href = archiveNoteUrl;
-            } else {
-              // If the user cancels, do nothing
-            }
-          });
+            archiveNoteButton.addEventListener('click', function (event) {
+                event.preventDefault();
+
+                // Show the confirmation prompt
+                if (window.confirm('Are you sure you want to archive this note?')) {
+                    // If the user confirms, proceed with the deletion by redirecting to the delete URL
+                    const archiveNoteUrl = archiveNoteButton.getAttribute('href');
+                    window.location.href = archiveNoteUrl;
+                } else {
+                    // If the user cancels, do nothing
+                }
+            });
         }
-        </script>
+    </script>
 
-        <!-- Load CKEditor -->
-<script src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
-<script src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+    <!-- Load CKEditor -->
+    <script src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+    <script src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
 
-<!-- Initialize CKEditor with the formatting bar -->
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    ClassicEditor.create(document.querySelector(".ckeditor"), {
-      toolbar: [
-        "heading",
-        "|",
-        "bold",
-        "italic",
-        "underline",
-        "strikethrough",
-        "|",
-        "bulletedList",
-        "numberedList",
-        "|",
-        "link",
-        "blockQuote",
-        "|",
-        "undo",
-        "redo",
-      ],
-    });
-  });
-</script>
+    <!-- Initialize CKEditor with the formatting bar -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            ClassicEditor.create(document.querySelector(".ckeditor"), {
+                toolbar: [
+                    "heading",
+                    "|",
+                    "bold",
+                    "italic",
+                    "underline",
+                    "strikethrough",
+                    "|",
+                    "bulletedList",
+                    "numberedList",
+                    "|",
+                    "link",
+                    "blockQuote",
+                    "|",
+                    "undo",
+                    "redo",
+                    "|",
+                    "backgroundColor", // Add the custom button to the toolbar
+                ],
+                plugins: ['fontSize', 'backgroundColor'], // Add the custom plugin
+            });
+        });
+    </script>
+    </script>
 
-    </body>
+</body>
+
 </html>
