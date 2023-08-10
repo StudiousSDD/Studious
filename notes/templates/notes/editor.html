@@ -98,8 +98,8 @@
                 <input type="hidden" name="sort_by" value="{{ sort_by }}">
 
                 <!-- Add a color picker input -->
-                <input type="color" id="colorInput" name="color" value="{{ document.color }}" required>
-                <div class="column is-10" style="background-color: {{ document.color }}">
+                <input type="color" id="colorInput" name="color" value="{{ document.color|default:'#ffffff'}}" required>
+                <div class="column is-10" style="background-color: {{ document.color|default:'#ffffff'}}">
 
                     <form method="post"
                         action="{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by={{ sort_by }}">
