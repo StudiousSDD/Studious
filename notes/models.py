@@ -5,6 +5,8 @@ from ckeditor.widgets import CKEditorWidget
 
 from schedule.models.events import Event, Occurrence
 
+from tags.models import Tag
+
 # Create your models here.
     
 class Class(models.Model):
@@ -31,6 +33,7 @@ class Lecture(models.Model):
 
 class Note(models.Model):
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE, null=True)
+    tag = models.ForeignKey(Tag, on_delete=models.SET_NULL, null=True)
     
     title = models.CharField(max_length=255)
     content = models.TextField()
@@ -51,4 +54,11 @@ class ArchivedNote(models.Model):
     archived_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.title.__str__() 
+        return self.title.__str__()
+    
+# to represent and manage tags 
+class Tag(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name

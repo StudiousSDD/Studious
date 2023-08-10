@@ -75,6 +75,9 @@
                 <div class="column is-10">
                     <form method="post" action="{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by={{ sort_by }}">
                         {% csrf_token %}
+                        {{ form.as_p }}
+                        {{ form.tag }}
+                        {{ form.new_tag }}
                         <input type="hidden" name="noteid" value="{{noteid}}">
                         <input type="hidden" name="sort_by" value="{{sort_by}}">
                         <div class="field">

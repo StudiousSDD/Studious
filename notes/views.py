@@ -5,12 +5,16 @@ from icalendar import Calendar
 import colorsys, random, math
 
 from .models import Note, Class, Lecture, ArchivedNote
-from .forms import AddClass,AddEvent,ImportEvent,EditEventForm
+from .forms import AddClass, AddEvent, ImportEvent, EditEventForm, NoteForm
 
 from schedule.models.events import Event, Occurrence
 from schedule.models.rules import Rule
+
+from tags.models import Tag
+
 # Create your views here.
 
+# handles the note editor page
 def editor(request, lectureid):
     noteid = int(request.GET.get('noteid',0))
 
@@ -18,6 +22,7 @@ def editor(request, lectureid):
     note = lec.note_set.all()
     archived_notes = lec.archivednote_set.all()
 
+    # sorting notes
     sort_by = request.GET.get('sort_by', 'title')
     if sort_by == 'title_asc':
         note = note.order_by('title')
@@ -32,22 +37,44 @@ def editor(request, lectureid):
         title = request.POST.get('title')
         content = request.POST.get('content')
 
-        if noteid > 0:
-            document = Note.objects.get(pk=noteid) # Change document 
-            document.title = title
-            document.content = content
-            document.save()
-
-            return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (noteid, sort_by))
-        else: 
-            document = Note.objects.create(title=title, content=content, lecture=lec)
-
-            return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (document.id,sort_by))
-
+    document = None
     if noteid > 0:
         document = Note.objects.get(pk=noteid)
+    
+    # if it's a form submission, either create new note or update existing note 
+    if request.method == 'POST':
+        form = NoteForm(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            content = form.cleaned_data['content']
+            tag = form.cleaned_data['tag']
+
+            # updates existing note
+            if noteid > 0:
+                # document = Note.objects.get(pk=noteid) # Change document 
+                document.title = title
+                document.content = content
+                document.tag = tag
+                document.save()
+
+                return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (noteid, sort_by))
+            # creates new note
+            else: 
+                document = Note.objects.create(title=title, content=content, lecture=lec, tag=tag)
+                return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (document.id,sort_by))
     else:
-        document = ''
+        if noteid > 0:
+            initial_data = {
+                'title': document.title,
+                'content': document.content,
+                'tag': document.tag,
+            }
+            form = NoteForm(initial=initial_data, instance=document)
+        else:
+            form = NoteForm()
+            # document = ''
+
+    form = NoteForm(request.POST or None, instance=document)
 
     context = {
         'lecture' : lec,
@@ -55,7 +82,8 @@ def editor(request, lectureid):
         'note' : note,
         'document' : document,
         'sort_by' : sort_by,
-        'archived_notes' : archived_notes
+        'archived_notes' : archived_notes,
+        'form': form,
     }
     return render(request, 'notes/editor.html',context)                 
 

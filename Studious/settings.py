@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'schedule',
     'accounts',
     'ckeditor',
+    'tags',
 ]
 
 MIDDLEWARE = [
