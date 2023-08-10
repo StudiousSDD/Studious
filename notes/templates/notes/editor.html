@@ -75,64 +75,79 @@
 
                         {% endfor %}
                     </ul>
+                    <!-- Search form -->
+    <form method="get">
+        <input type="text" name="search" value="{{ search_query }}">
+        <button type="submit">Search</button>
+    </form>
+
+    <!-- Display search results -->
+    {% if search_results %}
+    <h2>Search Results:</h2>
+    <ul>
+        {% for title in search_results %}
+        <li>{{ title }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
                 </aside>
             </div>
             <form method="post" action="{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by={{ sort_by }}">
                 {% csrf_token %}
                 <input type="hidden" name="noteid" value="{{ noteid }}">
-    <input type="hidden" name="sort_by" value="{{ sort_by }}">
-    
-    <!-- Add a color picker input -->
-    <input type="color" id="colorInput" name="color" value="{{ document.color }}" required>
+                <input type="hidden" name="sort_by" value="{{ sort_by }}">
+
+                <!-- Add a color picker input -->
+                <input type="color" id="colorInput" name="color" value="{{ document.color }}" required>
                 <div class="column is-10" style="background-color: {{ document.color }}">
-    
-                <form method="post"
-                    action="{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by={{ sort_by }}">
-                    {% csrf_token %}
-                    <input type="hidden" name="noteid" value="{{noteid}}">
-                    <input type="hidden" name="sort_by" value="{{sort_by}}">
-                    <div class="field">
-                        <label class="label">
-                            Title
-                            {%if document%}
-                            <span class="has-text-grey-light" style="float:right">
-                                Created at: {{ document.created_at|date:"m/d/Y"}} |
-                                Modified at: {{ document.modified_at|date:"m/d/Y"}}
-                            </span>
-                            {% endif %}
-                        </label>
 
-                        <div class="control">
-                            <input type="text" class="input" name="title" placeholder="Title" {% if note %}
-                                value="{{document.title}}" {% endif %}>
-                        </div>
-
-
+                    <form method="post"
+                        action="{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by={{ sort_by }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="noteid" value="{{noteid}}">
+                        <input type="hidden" name="sort_by" value="{{sort_by}}">
                         <div class="field">
-                            <label class="label">Content</label>
+                            <label class="label">
+                                Title
+                                {%if document%}
+                                <span class="has-text-grey-light" style="float:right">
+                                    Created at: {{ document.created_at|date:"m/d/Y"}} |
+                                    Modified at: {{ document.modified_at|date:"m/d/Y"}}
+                                </span>
+                                {% endif %}
+                            </label>
 
                             <div class="control">
-                                <textarea class="ckeditor" name="content"
-                                    placeholder="Content"> {% if note %}{{document.content}}{% endif %}</textarea>
+                                <input type="text" class="input" name="title" placeholder="Title" {% if note %}
+                                    value="{{document.title}}" {% endif %}>
+                            </div>
+
+
+                            <div class="field">
+                                <label class="label">Content</label>
+
+                                <div class="control">
+                                    <textarea class="ckeditor" name="content"
+                                        placeholder="Content"> {% if note %}{{document.content}}{% endif %}</textarea>
+                                </div>
+                            </div>
+
+                            <div class="field is-grouped">
+                                <div class="control">
+                                    <button class="button is-primary">Save</button>
+                                </div>
+                                {% if document %}
+                                <div class="control">
+                                    <a href="{% url 'notes:archive_document' document.id %}"
+                                        class="button is-danger archive-button">Archive Note</a>
+                                </div>
+                                {% endif %}
+
                             </div>
                         </div>
-
-                        <div class="field is-grouped">
-                            <div class="control">
-                                <button class="button is-primary">Save</button>
-                            </div>
-                            {% if document %}
-                            <div class="control">
-                                <a href="{% url 'notes:archive_document' document.id %}"
-                                    class="button is-danger archive-button">Archive Note</a>
-                            </div>
-                            {% endif %}
-
-                        </div>
-                    </div>
                     </form>
-                </form>
-            </div>
+            </form>
+        </div>
         </div>
     </section>
 
@@ -205,6 +220,34 @@
         });
     </script>
     </script>
+    <script>
+        const searchButton = document.getElementById('search_button');
+        const searchInput = document.getElementById('search_input');
+        const notesList = document.querySelectorAll('.menu-list li');
+    
+        searchButton.addEventListener('click', function () {
+            const searchTerm = searchInput.value.toLowerCase();
+            let matchingNotes = '';
+    
+            notesList.forEach(note => {
+                const noteTitle = note.querySelector('a').textContent;
+                const noteContent = note.querySelector('.content').textContent.toLowerCase();
+                
+                if (noteContent.includes(searchTerm)) {
+                    matchingNotes += noteTitle + '\n';
+                }
+            });
+    
+            if (matchingNotes) {
+                // Replace this with your own modal implementation or use an alert
+                alert('Matching Notes:\n' + matchingNotes);
+            } else {
+                alert('No matching notes found.');
+            }
+        });
+    </script>
+    ``
+    
 
 </body>
 
