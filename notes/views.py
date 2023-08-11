@@ -6,13 +6,16 @@ from django.urls import reverse
 from icalendar import Calendar
 import colorsys, random, math
 
-from .models import Note, Class, Lecture, ArchivedNote, ToDo
-from .forms import AddClass,AddEvent,ImportEvent,EditEventForm
+from .models import Note, Class, Lecture, ArchivedNote, Tag, ToDo
+from .forms import AddClass, AddEvent, ImportEvent, EditEventForm, NoteForm
+
 
 from schedule.models.events import Event, Occurrence
 from schedule.models.rules import Rule
+
 # Create your views here.
-# information for opening the note editor
+
+# handles the note editor page
 def editor(request, lectureid):
     # the id of the requested note (0 if none specified which opens a new note)
     noteid = int(request.GET.get('noteid',0))
@@ -24,8 +27,7 @@ def editor(request, lectureid):
     # the set of all archived notes for the requested lecture
     archived_notes = lec.archivednote_set.all()
 
-
-    # notes can be sorted in different ways
+    # sorting notes
     sort_by = request.GET.get('sort_by', 'title')
     if sort_by == 'title_asc':
         note = note.order_by('title')
@@ -40,6 +42,16 @@ def editor(request, lectureid):
         noteid = int(request.POST.get('noteid',0))
         title = request.POST.get('title')
         content = request.POST.get('content')
+
+    document = None
+    if noteid > 0:
+        document = Note.objects.get(pk=noteid)
+
+    
+    # if it's a form submission, either create new note or update existing note 
+    if request.method == 'POST':
+        form = NoteForm(request.POST)
+        delete_tag = request.POST.get('delete_tag')
         color = request.POST.get('color')
         # if they are changing an existing note update all the fields
         if noteid > 0:
@@ -53,12 +65,57 @@ def editor(request, lectureid):
         else: 
             document = Note.objects.create(title=title, content=content, lecture=lec, color=color)
 
-            return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (document.id,sort_by))
+        # if delete_tag == 'on' and document and document.tag:
+        #     selected_tag = form.cleaned_data['tag']
+        #     if selected_tag:
+        #         document.tag.delete()
+        #         document.tag = None
 
-    if noteid > 0:
-        document = Note.objects.get(pk=noteid)
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            content = form.cleaned_data['content']
+            new_tag = form.cleaned_data['new_tag']
+            tag = form.cleaned_data['tag']
+
+            if delete_tag == 'on' and document and tag:
+                tag_to_delete = Tag.objects.get(name=tag)
+                document.tag = None
+                tag_to_delete.delete()
+            
+            if new_tag:
+                tag, created = Tag.objects.get_or_create(name=new_tag)
+                # document.tag = tag
+            else: 
+                try:
+                    tag = Tag.objects.get(name=tag)
+                except Tag.DoesNotExist:
+                    tag = None
+
+            # updates existing note
+            if noteid > 0:
+                # document = Note.objects.get(pk=noteid) # Change document 
+                document.title = title
+                document.content = content
+                document.tag = tag
+                document.save()
+
+                return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (noteid, sort_by))
+            # creates new note
+            else: 
+                document = Note.objects.create(title=title, content=content, lecture=lec, tag=tag)
+                return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (document.id,sort_by))
     else:
-        document = ''
+        if noteid > 0:
+            initial_data = {
+                'title': document.title,
+                'content': document.content,
+                'tag': document.tag,
+            }
+            form = NoteForm(initial=initial_data, instance=document)
+        else:
+            form = NoteForm()
+
+    form = NoteForm(request.POST or None, instance=document)
 
     context = {
         'lecture' : lec,
@@ -66,7 +123,8 @@ def editor(request, lectureid):
         'note' : note,
         'document' : document,
         'sort_by' : sort_by,
-        'archived_notes' : archived_notes
+        'archived_notes' : archived_notes,
+        'form': form,
     }
     return render(request, 'notes/editor.html',context)                 
 
@@ -346,22 +404,50 @@ def create_class_from_event(event):
     class_name = event.title
     class_object = Class.objects.create(name=class_name, calendar_event=event)
     class_object.save() 
+    
+def outline_view(request, lectureid, noteid):
+    lec = Lecture.objects.get(id=lectureid)    
+    
+    # the set of all notes for the requested lecture
+    notes = lec.note_set.all()
+    # the set of all archived notes for the requested lecture
+    archived_notes = lec.archivednote_set.all()
+    
+    note = Note.objects.get(pk=noteid)
+    
+    outline = []
+    
+    for line in note.content.splitlines():
+        if (line[:4] == "<h1>" or 
+            line[:4] == "<h2>" or
+            line[:4] == "<h3>"):
+            new_line = line[:3] + " class=\"subtitle is-" + str(int(line[2]) + 3) + "\"" + line[3:]
+            outline.append(new_line)
+    
+    # notes can be sorted in different ways
+    sort_by = request.GET.get('sort_by', 'title')
+    if sort_by == 'title_asc':
+        note = note.order_by('title')
+    elif sort_by == 'title_desc':
+        note = note.order_by('-title')
+    elif sort_by == 'created_by_asc':
+        note = note.order_by('created_at')
+    elif sort_by == 'created_by_desc':
+        note = note.order_by('-created_at')
 
+    context = {
+        'lecture' : lec,
+        'note': note,
+        'outline' : outline,
+        'sort_by' : sort_by,
+        'notes' : notes,
+        'archived_notes' : archived_notes,
+    }
+    return render(request, 'notes/outline.html',context)                 
+
+    
 # translater between api calendar and visual calendar    
-def occurrences(request):
-    """
-    ?calendar_slug=main-calendar
-    &start=2023-07-30T00:00:00-04:00
-    &end=2023-09-10T00:00:00-04:00
-    
-    start=2023-07-30T00:00:00Z
-    &end=2023-09-10T00:00:00Z
-    &timeZone=UTC
-    
-    America%2FNew_York
-    &timeZone=UTC'
-    """
-    
+def occurrence_api(request):    
     start = request.GET.get("start").rstrip('Z')
     end = request.GET.get("end").rstrip('Z')
     timezone = request.GET.get("timeZone")
