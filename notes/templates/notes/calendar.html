@@ -87,24 +87,17 @@
       </div>
       <div class="col-lg-12 col-6 mb-lg-3">
         <h1>To-do List</h1>
-        <ul class="list-group">
-          <li class="list-group-item">
-            <input class="form-check-input me-1" type="checkbox" value="">
-            Look over lecture notes for Class 2
-          </li>
-          <li class="list-group-item">
-            <input class="form-check-input me-1" type="checkbox" value="">
-            Start homework for Class 1
-          </li>
-          <li class="list-group-item">
-            <input class="form-check-input me-1" type="checkbox" value="">
-            Finish take-home exam for Class 3
-          </li>
-          <li class="list-group-item">
-            <input class="form-check-input me-1" type="checkbox" value="">
-            <input class="border-0" type="text" placeholder="New to-do item...">
-          </li>
-        </ul>
+        <form action = '' method='post'>
+          {% csrf_token %}
+          {% for t in ToDos %}
+          <a class="list-group-item list-group-item-action" 
+            style="background-color: {{ t.cls.calendar_event.color_event }}"  href="{% url 'notes:edit_todo' t.cls.id %}?todoid={{t.id}}">
+            {{t.title}}
+            <input type="checkbox" value={{t.id}} name="checkbox_data" {% if t.completed %} checked {% endif %}><br>
+          </a>
+          {% endfor %}
+          <input type="submit" value="submit">
+        </form>
       </div>
     </div>
   </div>

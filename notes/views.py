@@ -6,13 +6,12 @@ from django.urls import reverse
 from icalendar import Calendar
 import colorsys, random, math
 
-from .models import Note, Class, Lecture, ArchivedNote
+from .models import Note, Class, Lecture, ArchivedNote, ToDo
 from .forms import AddClass,AddEvent,ImportEvent,EditEventForm
 
 from schedule.models.events import Event, Occurrence
 from schedule.models.rules import Rule
 # Create your views here.
-
 # information for opening the note editor
 def editor(request, lectureid):
     # the id of the requested note (0 if none specified which opens a new note)
@@ -75,9 +74,26 @@ def editor(request, lectureid):
 def home_calendar_view(request):
     if (request.user.is_authenticated):
         all_classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id)
+        todos = ToDo.objects.all();
+
+        if request.method == 'POST':
+            tdids_str = request.POST.getlist('checkbox_data')
+            tdids = []
+            for s in tdids_str:
+                tdids.append(int(s))
+            for td in todos:
+                if td.id in tdids:
+                    td.completed = True
+                else:
+                    td.completed = False
+                    
+                td.save()
+        
         context = {
             'classes' : all_classes,
+            'ToDos'   : todos,
         }
+              
     else:
         context = None
     return render(request, "notes/calendar.html", context)
@@ -94,11 +110,13 @@ def view_class(request, classid):
             lecture_queryset = class_instance.lecture_set.order_by('-lecture_number')
         elif sort_by == 'earliest':
             lecture_queryset = class_instance.lecture_set.order_by('lecture_number')
+        todos = class_instance.todo_set.all()
         context = {
             'classes' : classes,
             'classid' : class_instance,
             'sort_by' : sort_by,
             'lecture_queryset' : lecture_queryset,
+            'ToDos'   : todos
         }
     else:
         context = None
@@ -108,7 +126,7 @@ def view_class(request, classid):
 def create_lecture(request):
     # get which class this is for from the request
     classid = request.GET.get('classid',0)
-    cls = Class.objects.get(name=classid)
+    cls = Class.objects.get(id=classid)
     # the event associated with the class
     eve = cls.calendar_event
     # the number of the next lecture (number of lectures currently made + 1)
@@ -138,21 +156,6 @@ def create_lecture(request):
     lec.save()
     # redirect back to the page they were just on
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-
-# def delete_document(request, noteid):
-#     document = get_object_or_404(Note,pk=noteid)
-#     #Archiving the document 
-#     archived_document = ArchivedNote(
-#         lecture = document.lecture,
-#         title = document.title,
-#         content = document.content,
-#     )
-
-#     archived_document.save() 
-
-#     document.delete()
-#     sort_by = request.GET.get('sort_by')
-#     return redirect('/notes/?noteid=0&sort_by=%s' % sort_by)
 
 # change a note over to an archived note
 def archive_document(request, noteid):
@@ -188,10 +191,6 @@ def restore_archived_note(request,noteid):
     # return back to the notes page of this lecture
     return redirect(f'/notes/{document.lecture.id}?noteid={note.id}&sort_by={sort_by}')
 
-# def archived_note_view(request):
-#     archived_notes = ArchivedNote.objects.all()
-#     return render(request,'notes/editor.html', {'archived_notes': archived_notes})
-
 # delete an archived note (asks for confirmation first)
 def delete_archived_note(request, noteid):
     if request.method == 'POST':
@@ -202,6 +201,7 @@ def delete_archived_note(request, noteid):
         return redirect(f'/notes/{lectureid}?noteid=0&sort_by={sort_by}')
     else:
         return render(request,'editor.html')
+
 # creates a new class
 def add_class(request):
     # if they send the class data create the new class
@@ -214,6 +214,7 @@ def add_class(request):
         return redirect('/class/{}'.format(name))
     # send them to the page where they can create a new class
     return render(request, "notes/add_class.html",{'form': AddClass})
+
 # backend needed to create the event for a class
 def create_event(form):
     event_title = form.cleaned_data['title']
@@ -225,22 +226,26 @@ def create_event(form):
                                 )
     create_class_from_event(event)
     return event
+
 # make a random pastel color for imported classes
 def random_pastel():
     random.seed()
     hue = random.randrange(360)
     return hue_to_pastel(hue)
+
 # create pastel colors that look nice for classes
 def hue_to_pastel(hue):
     color = colorsys.hsv_to_rgb(hue / 360, 0.4, 1.0)
     r, g, b = color[0], color[1], color[2]
     return '#%02x%02x%02x' % (int(r * 255), int(g * 255), int(b * 255))
+
 # change a hex value to its hue
 def hex_to_hue(hex):
     hex = hex.lstrip('#')
     rgb = tuple(int(hex[i:i+2], 16) for i in (0, 2, 4))
     hsl = colorsys.rgb_to_hls(rgb[0], rgb[1], rgb[2])
     return math.floor(hsl[0] * 360)
+
 # add a new event (class)
 def add_event(request):
     if request.POST:
@@ -260,6 +265,7 @@ def add_event(request):
         title = form.cleaned_data["title"]
         return redirect('/class/{}'.format(title))
     return render(request, "notes/add_event.html",{'form': AddEvent})
+
 # import classes from a file from QUACS
 def import_class(request):
     if request.POST:
@@ -282,6 +288,7 @@ def import_class(request):
                     create_class_from_event(event)
             return redirect('/class/{}'.format(made[0]))
     return render(request, "notes/import_class.html",{'form': ImportEvent})
+
 # delete a class
 def delete_class(request, classid):
     a_class = Class.objects.get(pk=classid)
@@ -290,6 +297,7 @@ def delete_class(request, classid):
     a_event.delete()
     # redirect to the home page
     return redirect('/')
+
 # change a class's color
 def edit_class(request, classid):
     obj = get_object_or_404(Class, id=classid)
@@ -315,6 +323,7 @@ def edit_class(request, classid):
         form = EditEventForm(instance=event, hue=hue)
 
     return render(request, "notes/edit_class.html", {"form": form, "classid": classid})
+
 # create a rule that dictates what days a class occurs on
 def create_rule(ename, rep):
     rrname = (ename + '_repeat')
@@ -331,11 +340,13 @@ def create_rule(ename, rep):
                               )
     rule.save()
     return rule
+
 # make a class for a given event
 def create_class_from_event(event):
     class_name = event.title
     class_object = Class.objects.create(name=class_name, calendar_event=event)
     class_object.save() 
+
 # translater between api calendar and visual calendar    
 def occurrences(request):
     """
@@ -373,3 +384,41 @@ def update_note_color(request):
                     return JsonResponse({'message': 'Note not found'}, status=404)
 
     return JsonResponse({'message': 'Invalid request'}, status=400)
+
+def edit_todo(request, classid):
+
+    todoid = int(request.GET.get('todoid',0))
+
+    cls = Class.objects.get(id=classid)
+
+    todo = cls.todo_set.all()
+
+    if request.method == 'POST':
+        todoid = int(request.POST.get('tdid',0))
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        # if they are changing an existing todo update all the fields
+        if todoid > 0:
+            document = ToDo.objects.get(pk=todoid) # Change document 
+            document.title = title
+            document.description = description
+            document.save()
+
+            return redirect('/todo/{}?todoid=%i'.format(classid) % (todoid))
+        else: 
+            document = ToDo.objects.create(title=title, description=description, cls=cls, completed=False)
+
+            return redirect('/todo/{}?todoid=%i'.format(classid) % (document.id))
+
+    if todoid > 0:
+        document = ToDo.objects.get(pk=todoid)
+    else:
+        document = ''
+
+    context = {
+        'cls' : cls,
+        'todoid' : todoid,
+        'todo' : todo,
+        'document' : document,
+    }
+    return render(request, 'notes/todo.html',context)  

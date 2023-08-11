@@ -67,3 +67,12 @@ class ArchivedNote(models.Model):
 
     def __str__(self):
         return self.title.__str__() 
+
+class ToDo(models.Model):
+    cls = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
+
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    completed = models.BooleanField()
+    def __str__(self) -> str:
+        return self.title

@@ -1,7 +1,7 @@
 from django.forms import ModelForm, Form
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from .models import Class 
+from .models import Class
 from schedule.models.events import Event 
 
 days_of_week = [

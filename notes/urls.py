@@ -24,4 +24,6 @@ urlpatterns = [
     path('class/<str:classid>/', views.view_class, name='view_class'),
 
     path('create_lecture/', views.create_lecture, name='create_lecture'),
+
+    path('todo/<int:classid>', views.edit_todo, name="edit_todo"),
 ]
