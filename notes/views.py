@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 from icalendar import Calendar
+from datetime import datetime
 import colorsys, random, math
 
 from .models import Note, Class, Lecture, ArchivedNote, Tag, ToDo
@@ -310,6 +311,15 @@ def add_event(request):
         form = AddEvent(request.POST,request.FILES)
         if form.is_valid():
             event = form.save(commit=False)
+            
+            start_date = form.cleaned_data["start_date"]
+            end_date = form.cleaned_data["end_date"]
+            start_time = form.cleaned_data["start_time"]
+            end_time = form.cleaned_data["end_time"]
+            
+            event.start = datetime.combine(start_date, start_time)
+            event.end = datetime.combine(start_date, end_time)
+            event.end_recurring_period = end_date            
             
             repeat = form.cleaned_data["repeat"]
             rule = create_rule(event.title, repeat)

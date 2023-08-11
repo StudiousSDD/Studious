@@ -24,15 +24,22 @@ class AddEvent(ModelForm):
     color_widget  = forms.TextInput(attrs={'type': 'range', 'min': 0, 'max': 359, 'step': 1, 'class': 'slider'})
     color = forms.IntegerField(min_value=0, max_value=359, widget=color_widget)
     
+    time_widget = forms.TextInput(attrs={'type': 'time'})
+    date_widget = forms.TextInput(attrs={'type': 'date'})
+    
+    start_time = forms.TimeField(widget=time_widget)
+    end_time = forms.TimeField(widget=time_widget)
+
+    start_date = forms.DateField(widget=date_widget)
+    end_date = forms.DateField(widget=date_widget)
+    
     repeat = forms.MultipleChoiceField(choices=days_of_week, widget=forms.CheckboxSelectMultiple())
     
     class Meta: 
         model = Event
-        fields = ['title','start','end','calendar','end_recurring_period',]
+        fields = ['title', 'calendar',]
         widgets = {
-            'start': forms.TextInput(attrs={'type': 'datetime-local'}),
-            'end': forms.TextInput(attrs={'type': 'datetime-local'}),
-            'end_recurring_period': forms.TextInput(attrs={'type': 'date'}),
+            'calendar': forms.HiddenInput(),
         }
         labels = {
             'end_recurring_period': _("End Repeat"),
