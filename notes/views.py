@@ -131,21 +131,27 @@ def editor(request, lectureid):
 
 # send only the classes associated with this account to be displayed on the home page
 def home_calendar_view(request):
+    #make sure the user is signed in
     if (request.user.is_authenticated):
+        #get all the classes associated with this account
         all_classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id)
         todos = ToDo.objects.all();
 
+        #if they submit a change to the to-dos
         if request.method == 'POST':
+            #gather all the checked items
             tdids_str = request.POST.getlist('checkbox_data')
             tdids = []
             for s in tdids_str:
                 tdids.append(int(s))
             for td in todos:
+                #if the to-do should be checked make it
                 if td.id in tdids:
                     td.completed = True
+                #otherwise uncheck it
                 else:
                     td.completed = False
-                    
+                #save the object    
                 td.save()
         
         context = {
@@ -159,17 +165,23 @@ def home_calendar_view(request):
 
 # find the correct class to display (as well as all other classes of this account for the side bar)
 def view_class(request, classid):
+    #if the user is signed in
     if (request.user.is_authenticated):
+        #gather all their classes as well as the specific class
         classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id)
         class_instance = Class.objects.get(name=classid)
-
+        #get all the lectures for that class
         lecture_queryset = class_instance.lecture_set.all()
+
+        #sort the notes
         sort_by = request.GET.get('sort_by', 'latest')  # Default to sorting by latest
         if sort_by == 'latest':
             lecture_queryset = class_instance.lecture_set.order_by('-lecture_number')
         elif sort_by == 'earliest':
             lecture_queryset = class_instance.lecture_set.order_by('lecture_number')
+        #get all the to-do items
         todos = class_instance.todo_set.all()
+
         context = {
             'classes' : classes,
             'classid' : class_instance,
@@ -252,11 +264,14 @@ def restore_archived_note(request,noteid):
 
 # delete an archived note (asks for confirmation first)
 def delete_archived_note(request, noteid):
+    #if they select to delete 
     if request.method == 'POST':
         sort_by = request.GET.get('sort_by', 'title')
+        #get and delete the archived note they want deleted
         note = get_object_or_404(ArchivedNote, id=noteid)
         lectureid = note.lecture.id
         note.delete()
+        #return to the notes page
         return redirect(f'/notes/{lectureid}?noteid=0&sort_by={sort_by}')
     else:
         return render(request,'editor.html')
@@ -276,6 +291,7 @@ def add_class(request):
 
 # backend needed to create the event for a class
 def create_event(form):
+    #grab the form information and create the new event
     event_title = form.cleaned_data['title']
     event = Event.objects.create(title=event_title, 
                                  start=form.cleaned_data['start'], 
@@ -283,6 +299,7 @@ def create_event(form):
                                  calendar=form.cleaned_data['calendar'], 
                                  color_event=form.cleaned_data['color_event'],
                                 )
+    #create the class off of the event
     create_class_from_event(event)
     return event
 
@@ -307,8 +324,11 @@ def hex_to_hue(hex):
 
 # add a new event (class)
 def add_event(request):
+    #when they submit the information
     if request.POST:
+        #make the event with the collected data
         form = AddEvent(request.POST,request.FILES)
+        #gather the data for the class and make the event
         if form.is_valid():
             event = form.save(commit=False)
             
@@ -329,6 +349,7 @@ def add_event(request):
             event.color_event = hue_to_pastel(hue)
             
             event.save()
+            #create the class
             create_class_from_event(event)
         title = form.cleaned_data["title"]
         return redirect('/class/{}'.format(title))
@@ -336,8 +357,11 @@ def add_event(request):
 
 # import classes from a file from QUACS
 def import_class(request):
+    #when they submit
     if request.POST:
+        #import the event details from the file using the ImportEvent form
         form = ImportEvent(request.POST,request.FILES)
+        #create the classes with the events
         if form.is_valid():
             data = request.FILES['file'].read()
             cal = Calendar.from_ical(data)
@@ -345,6 +369,7 @@ def import_class(request):
             for component in cal.walk():
                 if component.name == "VEVENT" and component.get('summary') not in made:
                     made.append(component.get('summary'))
+                    #create the event using the gathered data
                     event = Event.objects.create(   title = component.get('summary'),
                                                     start = component.decoded('dtstart'),
                                                     end = component.decoded('dtend'),
@@ -353,14 +378,18 @@ def import_class(request):
                                                     end_recurring_period = component.get('rrule').get('until')[0],
                                                     rule = create_rule(component.get('summary'), component.get('rrule').get('BYDAY')),      
                                                 ) 
+                    #create the class from the event
                     create_class_from_event(event)
+            #redirect into the class page
             return redirect('/class/{}'.format(made[0]))
     return render(request, "notes/import_class.html",{'form': ImportEvent})
 
 # delete a class
 def delete_class(request, classid):
+    #get the class and event
     a_class = Class.objects.get(pk=classid)
     a_event = a_class.calendar_event
+    #delete them both
     a_class.delete()
     a_event.delete()
     # redirect to the home page
@@ -368,22 +397,25 @@ def delete_class(request, classid):
 
 # change a class's color
 def edit_class(request, classid):
+    #get the class and event
     obj = get_object_or_404(Class, id=classid)
     event = obj.calendar_event
-
+    #when they submit
     if request.method == "POST":
+        #use the EditEventForm to get the edit data
         form = EditEventForm(request.POST, instance=event)
         if form.is_valid():
+            #get the event
             event = form.save(commit=False)
-            
+            #change the data of the event
             hue = form.cleaned_data["color"]
             event.color_event = hue_to_pastel(hue)
-            
+            #save the event and class
             event.save()
 
             obj.name = event.title
             obj.save()
-            
+            #open that class page
             return redirect(f'/class/{event.title}')
 
     else:
@@ -394,39 +426,47 @@ def edit_class(request, classid):
 
 # create a rule that dictates what days a class occurs on
 def create_rule(ename, rep):
+    #take the corect name and name the repeat pattern
     rrname = (ename + '_repeat')
     desc = rrname
+    #set the frequency to weekly
     freq = "WEEKLY"    
     params = "byweekday:"
+    #set which days every week it occurs
     for r in rep:
         params += (r + ',')
-    
+    #create the rule
     rule = Rule.objects.create(name = rrname,
                                description = desc,
                                frequency = freq,
                                params = params
                               )
+    #save the rule
     rule.save()
     return rule
 
 # make a class for a given event
 def create_class_from_event(event):
+    #class name should match event title
     class_name = event.title
+    #create and save the class
     class_object = Class.objects.create(name=class_name, calendar_event=event)
     class_object.save() 
     
+# show an outline_view of a note
 def outline_view(request, lectureid, noteid):
+    #grab the relevant lecture
     lec = Lecture.objects.get(id=lectureid)    
     
     # the set of all notes for the requested lecture
     notes = lec.note_set.all()
     # the set of all archived notes for the requested lecture
     archived_notes = lec.archivednote_set.all()
-    
+    #grab the relevant note
     note = Note.objects.get(pk=noteid)
     
     outline = []
-    
+    # if any line is a header or sub header add it to the outline view
     for line in note.content.splitlines():
         if (line[:4] == "<h1>" or 
             line[:4] == "<h2>" or
@@ -455,7 +495,6 @@ def outline_view(request, lectureid, noteid):
     }
     return render(request, 'notes/outline.html',context)                 
 
-    
 # translater between api calendar and visual calendar    
 def occurrence_api(request):    
     start = request.GET.get("start").rstrip('Z')
@@ -465,13 +504,17 @@ def occurrence_api(request):
     
     return redirect(f'/schedule/api/occurrences?calendar_slug={calendar_slug}&start={start}&end={end}&timezone={timezone}')
 
+# a function to change the color of a notes background
 def update_note_color(request):
+    #when they submmit
     if request.method == 'POST' and request.is_ajax():
+        #get the selected color
         color = request.POST.get('color', None)
         if color:
             note_id = request.session.get('noteid')  # Change this to your actual method of identifying the note
             if note_id:
                 try:
+                    #get the relevant note and change its color
                     note = Note.objects.get(id=note_id)
                     note.color = color
                     note.save()
@@ -481,33 +524,38 @@ def update_note_color(request):
 
     return JsonResponse({'message': 'Invalid request'}, status=400)
 
+# a view to change (or create a new) to-do
 def edit_todo(request, classid):
-
+    #get the relevant to-do (or open up a new one)
     todoid = int(request.GET.get('todoid',0))
-
+    #get the correct class for the to-do
     cls = Class.objects.get(id=classid)
-
+    #get all this class's to-do items to display in the to-do list
     todo = cls.todo_set.all()
-
+    #when they submit
     if request.method == 'POST':
+        #grab the data
         todoid = int(request.POST.get('tdid',0))
         title = request.POST.get('title')
         description = request.POST.get('description')
         # if they are changing an existing todo update all the fields
         if todoid > 0:
-            document = ToDo.objects.get(pk=todoid) # Change document 
+            document = ToDo.objects.get(pk=todoid)
             document.title = title
             document.description = description
             document.save()
 
             return redirect('/todo/{}?todoid=%i'.format(classid) % (todoid))
+        #otherwise create a new To-Do
         else: 
             document = ToDo.objects.create(title=title, description=description, cls=cls, completed=False)
 
             return redirect('/todo/{}?todoid=%i'.format(classid) % (document.id))
 
+    #if a to-do is selected grab its description
     if todoid > 0:
         document = ToDo.objects.get(pk=todoid)
+    #otherwise make it empty
     else:
         document = ''
 

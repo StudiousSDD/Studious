@@ -77,6 +77,9 @@ class ArchivedNote(models.Model):
     def __str__(self):
         return self.title.__str__() 
 
+# a to-do item is associated with a class
+# it has a title, description and completed
+# it is associated with a class
 class ToDo(models.Model):
     cls = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
 

@@ -13,13 +13,13 @@ days_of_week = [
     ("SA", "Saturday"),
     ("SU", "Sunday"),
 ]
-
+# a form to input class name
 class AddClass(ModelForm):
     name = forms.TextInput()
     class Meta:
         model = Class
         fields = ['name']
-
+# a form to get necessary data to create an event
 class AddEvent(ModelForm):
     color_widget  = forms.TextInput(attrs={'type': 'range', 'min': 0, 'max': 359, 'step': 1, 'class': 'slider'})
     color = forms.IntegerField(min_value=0, max_value=359, widget=color_widget)
@@ -44,7 +44,7 @@ class AddEvent(ModelForm):
         labels = {
             'end_recurring_period': _("End Repeat"),
         }
-
+# a form to get a file
 class ImportEvent(ModelForm):
     file = forms.FileField()
     class Meta:
@@ -53,7 +53,7 @@ class ImportEvent(ModelForm):
         widgets = {
             'calendar': forms.HiddenInput(),
         }
-        
+# a form to get event info allowed for editing
 class EditEventForm(ModelForm):    
     def __init__(self, *args, **kwargs):
         hue = kwargs.pop('hue', None)
