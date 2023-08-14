@@ -70,7 +70,6 @@
 
                         <div class="field">
                             <label class="label">Desciption</label>
-
                             <div class="control">
                                 <textarea name="description" placeholder="Description"> {% if todo %}{{document.description}}{% endif %}</textarea>
                             </div>
@@ -80,6 +79,12 @@
                             <div class="control">
                                 <button class="button is-primary">Save</button>
                             </div>
+                            {% if document %}
+                                <div class="control">
+                                    <a href="{% url 'notes:delete_todo' todoid %}"
+                                        class="button is-danger archive-button">Delete</a>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                     </form>

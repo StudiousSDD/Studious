@@ -82,7 +82,7 @@
             <a class="list-group-item list-group-item-action" 
               style="background-color: {{ t.cls.calendar_event.color_event }}"  href="{% url 'notes:edit_todo' t.cls.id %}?todoid={{t.id}}">
               {{t.title}}
-              <input type="checkbox" value={{t.id}} name="checkbox_data" {% if t.completed %} checked {% endif %}><br>
+              <input type="checkbox" value={{t.id}} name="checkbox_data" {% if t.completed %} checked {% endif %} >
             </a>
             {% endfor %}
             <input type="submit" value="submit">
@@ -126,6 +126,13 @@
         <h3><a href="{% url 'notes:create_lecture' %}?classid={{classid.id}}">New Lecture</a></h3>
       </div>
   </div>
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
 </div>
 
 <script>

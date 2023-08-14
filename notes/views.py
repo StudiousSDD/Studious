@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.contrib import messages
 
 from icalendar import Calendar
 from datetime import datetime
@@ -37,12 +38,7 @@ def editor(request, lectureid):
     elif sort_by == 'created_by_asc':
         note = note.order_by('created_at')
     elif sort_by == 'created_by_desc':
-        note = note.order_by('-created_at')
-    #if they create a new note save it
-    if request.method == 'POST':
-        noteid = int(request.POST.get('noteid',0))
-        title = request.POST.get('title')
-        content = request.POST.get('content')
+        note = note.order_by('-created_at')        
 
     document = None
     if noteid > 0:
@@ -51,27 +47,14 @@ def editor(request, lectureid):
     
     # if it's a form submission, either create new note or update existing note 
     if request.method == 'POST':
+        # get the necessary data
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+
         form = NoteForm(request.POST)
         delete_tag = request.POST.get('delete_tag')
         color = request.POST.get('color')
-        # if they are changing an existing note update all the fields
-        if noteid > 0:
-            document = Note.objects.get(pk=noteid) # Change document 
-            document.title = title
-            document.content = content
-            document.color = color
-            document.save()
-
-            return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (noteid, sort_by))
-        else: 
-            document = Note.objects.create(title=title, content=content, lecture=lec, color=color)
-
-        # if delete_tag == 'on' and document and document.tag:
-        #     selected_tag = form.cleaned_data['tag']
-        #     if selected_tag:
-        #         document.tag.delete()
-        #         document.tag = None
-
+      
         if form.is_valid():
             title = form.cleaned_data['title']
             content = form.cleaned_data['content']
@@ -97,13 +80,14 @@ def editor(request, lectureid):
                 # document = Note.objects.get(pk=noteid) # Change document 
                 document.title = title
                 document.content = content
+                document.color = color
                 document.tag = tag
                 document.save()
 
                 return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (noteid, sort_by))
             # creates new note
             else: 
-                document = Note.objects.create(title=title, content=content, lecture=lec, tag=tag)
+                document = Note.objects.create(title=title, content=content, lecture=lec, tag=tag, color=color)
                 return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (document.id,sort_by))
     else:
         if noteid > 0:
@@ -115,8 +99,6 @@ def editor(request, lectureid):
             form = NoteForm(initial=initial_data, instance=document)
         else:
             form = NoteForm()
-
-    form = NoteForm(request.POST or None, instance=document)
 
     context = {
         'lecture' : lec,
@@ -213,7 +195,11 @@ def create_lecture(request):
     generator = eve.occurrences_after(time)
     # search through lectures until a new one is generated
     while(1):
-        occurr = next(generator)
+        try:
+            occurr = next(generator)
+        except:
+            messages.info(request, 'There are no more lectures to create!')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
         # since some lectures overlap we need to find one that starts AFTER the previous lecture (or start of class)
         if (occurr.start > time):
             break
@@ -226,6 +212,7 @@ def create_lecture(request):
     )
     lec.save()
     # redirect back to the page they were just on
+    messages.info(request, 'New lecture created successfully!')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 # change a note over to an archived note
@@ -566,3 +553,12 @@ def edit_todo(request, classid):
         'document' : document,
     }
     return render(request, 'notes/todo.html',context)  
+
+# delete a to-do
+def delete_todo(request, todoid):
+    #get and delete the todo they want deleted
+    todo = get_object_or_404(ToDo, id=todoid)
+    cls = todo.cls
+    todo.delete()
+    #return to the class page
+    return redirect(f'/class/{cls}')
