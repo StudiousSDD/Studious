@@ -1,7 +1,4 @@
 from django.db import models
-from datetime import date
-from django.utils import timezone
-from ckeditor.widgets import CKEditorWidget
 
 from schedule.models.events import Event, Occurrence
 from django.contrib.auth.models import User
@@ -12,6 +9,7 @@ from django.contrib.auth.models import User
 # to represent and manage tags 
 class Tag(models.Model):
     name = models.CharField(max_length=31)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.name
@@ -22,29 +20,18 @@ class Tag(models.Model):
 # it is displayed as it's name
 class Class(models.Model):
     calendar_event = models.OneToOneField(Event, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
     name = models.CharField(max_length=31)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    archived = models.BooleanField(default=False)
     class Meta:
         ordering=('name',)   #   Order by class name alphabetically? 
         
     def __str__(self):
         return self.name
     
-class ArchivedClass(models.Model):
-    calendar_event = models.OneToOneField(Event, on_delete=models.CASCADE, null=True)
-
-    name = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
-    archived_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering=('name',)   #   Order by class name alphabetically? 
-        
-    def __str__(self):
-        return self.name
-
 # a Lecture needs an Occurence as it represents a single Class time
 # a Lecture is associated with a Class, each Class can have many Lectures
 # a Lecture has no name and is instead numbered

@@ -8,12 +8,12 @@ from icalendar import Calendar
 from datetime import datetime
 import colorsys, random, math, pytz
 
-from .models import Note, Class, Lecture, ArchivedNote, Tag, ToDo, ArchivedClass
-from .forms import AddClass, AddEvent, ImportEvent, EditEventForm, NoteForm
+from .models import Note, Class, Lecture, ArchivedNote, Tag, ToDo
+from .forms import AddEvent, ImportEvent, EditEventForm, NoteForm
 
 
 from schedule.models.calendars import Calendar
-from schedule.models.events import Event, Occurrence
+from schedule.models.events import Event
 from schedule.models.rules import Rule
 
 # Create your views here.
@@ -68,11 +68,11 @@ def editor(request, lectureid):
                 tag_to_delete.delete()
             
             if new_tag:
-                tag, created = Tag.objects.get_or_create(name=new_tag)
+                tag = Tag.objects.get_or_create(name=new_tag, user=request.user)
                 # document.tag = tag
             else: 
                 try:
-                    tag = Tag.objects.get(name=tag)
+                    tag = Tag.objects.get(name=tag, user=request.user)
                 except Tag.DoesNotExist:
                     tag = None
 
@@ -117,9 +117,9 @@ def home_calendar_view(request):
     #make sure the user is signed in
     if (request.user.is_authenticated):
         #get all the classes associated with this account
-        all_classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id)
-        todos = ToDo.objects.filter(user=request.user)
-        archived_classes = ArchivedClass.objects.all()
+        all_classes = Class.objects.filter(user=request.user, archived=False)
+        todos = ToDo.objects.filter(user=request.user, cls__archived=False)
+        archived_classes = Class.objects.filter(user=request.user, archived=True)
 
         #if they submit a change to the to-dos
         if request.method == 'POST':
@@ -153,10 +153,10 @@ def view_class(request, classid):
     #if the user is signed in
     if (request.user.is_authenticated):
         #gather all their classes as well as the specific class
-        classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id)
+        classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id, archived=False)
+        archived_classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id, archived=True)
         class_instance = Class.objects.get(name=classid)
-        archived_classes = ArchivedClass.objects.all()
-
+        
         #get all the lectures for that class
         lecture_queryset = class_instance.lecture_set.all()
 
@@ -269,19 +269,6 @@ def delete_archived_note(request, noteid):
     else:
         return render(request,'editor.html')
 
-# creates a new class
-def add_class(request):
-    # if they send the class data create the new class
-    if request.POST:
-        form = AddClass(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-        name = form.name
-        # send them to the new class page
-        return redirect('/class/{}'.format(name))
-    # send them to the page where they can create a new class
-    return render(request, "notes/add_class.html",{'form': AddClass})
-
 # backend needed to create the event for a class
 def create_event(form):
     #grab the form information and create the new event
@@ -343,7 +330,7 @@ def add_event(request):
             
             event.save()
             #create the class
-            create_class_from_event(event)
+            create_class_from_event(event, request.user)
         title = form.cleaned_data["title"]
         return redirect('/class/{}'.format(title))
     return render(request, "notes/add_event.html",{'form': AddEvent})
@@ -379,39 +366,30 @@ def import_class(request):
 
 # archive a class
 def archive_class(request, classid):
-    a_class = Class.objects.get(pk=classid)
-    a_name = a_class.name
-    a_event = a_class.calendar_event
-    a_date = a_class.created_at
+    cls = Class.objects.get(pk=classid)
+    cls.archived = True
+    cls.save()
+    eve = cls.calendar_event
     
     # move to the archive calendar
     archive_calendar = get_object_or_404(Calendar, slug="archive")
-    a_event.calendar = archive_calendar
-    a_event.save()
-    
-    archived_class = ArchivedClass.objects.create(name=a_name,   
-                                                calendar_event=a_event,
-                                                created_at=a_date)
-    archived_class.save()
-    a_class.delete()
+    eve.calendar = archive_calendar
+    eve.save()
 
     # redirect to the home page
     return redirect('/')
 
 # restore a class
 def restore_class(request, classid):
-    a_class = ArchivedClass.objects.get(pk=classid)
+    cls = Class.objects.get(pk=classid)
+    cls.archived = False
+    cls.save()
     
-    a_event = a_class.calendar_event
+    eve = cls.calendar_event
     user_calendar = request.user.profile.calendar
-    a_event.calendar = user_calendar
-    a_event.save()
-    
-    class_object = Class.objects.create(name=a_class.name, 
-                                        calendar_event=a_event, 
-                                        created_at=a_class.created_at)
-    class_object.save()
-    a_class.delete()
+    eve.calendar = user_calendar
+    eve.save()
+
     # redirect to the home page
     return redirect('/')
 
@@ -419,12 +397,12 @@ def restore_class(request, classid):
 def delete_class(request, classid):
 
     #get the class and event
-    a_class = ArchivedClass.objects.get(pk=classid)
-    a_event = a_class.calendar_event
+    cls = Class.objects.get(pk=classid)
+    eve = cls.calendar_event
 
     #delete them both
-    a_class.delete()
-    a_event.delete()
+    cls.delete()
+    eve.delete()
     # redirect to the home page
     return redirect('/')
 
@@ -479,11 +457,11 @@ def create_rule(ename, rep):
     return rule
 
 # make a class for a given event
-def create_class_from_event(event):
+def create_class_from_event(event, username):
     #class name should match event title
     class_name = event.title
     #create and save the class
-    class_object = Class.objects.create(name=class_name, calendar_event=event)
+    class_object = Class.objects.create(name=class_name, user=username, calendar_event=event)
     class_object.save() 
     
 # show an outline_view of a note
@@ -558,12 +536,7 @@ def todo_api(request):
     response_data = []
     
     # finds all of the user's classes and adds the todo items from them
-    user_events = Event.objects.filter(calendar=cal)
-    for e in user_events:
-        user_class = Class.objects.get(calendar_event=e)
-        class_color = e.color_event
-        
-        todo_items = ToDo.objects.filter(user=request.user)
+    todo_items = ToDo.objects.filter( cls__archived=False, user=request.user)
     for i in todo_items:
             url = reverse('notes:view_class', args=[i.cls.name]) if i.cls else reverse('notes:home_page')
             color = i.cls.calendar_event.color_event if i.cls else '#808080'

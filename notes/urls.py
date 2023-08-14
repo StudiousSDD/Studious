@@ -23,7 +23,6 @@ urlpatterns = [
     path('restore_archived_note/<int:noteid>/', views.restore_archived_note, name='restore_archived_note'),
     path('notes/<int:lectureid>/<int:noteid>/outline', views.outline_view, name='outline'),
 
-    path('add_class/', views.add_class, name='add_class'),
     path('add_event/', views.add_event, name='add_event'),
     path('class/<str:classid>/', views.view_class, name='view_class'),
 

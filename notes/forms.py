@@ -1,4 +1,4 @@
-from django.forms import ModelForm, Form
+from django.forms import ModelForm
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from .models import Class, Note, Tag
@@ -13,12 +13,6 @@ days_of_week = [
     ("SA", "Saturday"),
     ("SU", "Sunday"),
 ]
-# a form to input class name
-class AddClass(ModelForm):
-    name = forms.TextInput()
-    class Meta:
-        model = Class
-        fields = ['name']
 # a form to get necessary data to create an event
 class AddEvent(ModelForm):
     color_widget  = forms.TextInput(attrs={'type': 'range', 'min': 0, 'max': 359, 'step': 1, 'class': 'slider'})
@@ -70,7 +64,6 @@ class EditEventForm(ModelForm):
         widgets = {
             'calendar': forms.HiddenInput(),
         }
-
 # allow users to select a tag or create a new tag for each note
 class NoteForm(forms.ModelForm):
     new_tag = forms.CharField(max_length=100, required=False, label="Create New Tag", widget=forms.TextInput(attrs={'placeholder': 'e.g., homework'}))
