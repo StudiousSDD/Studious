@@ -118,7 +118,7 @@ def home_calendar_view(request):
     if (request.user.is_authenticated):
         #get all the classes associated with this account
         all_classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id)
-        todos = ToDo.objects.all();
+        todos = ToDo.objects.filter(user=request.user)
 
         #if they submit a change to the to-dos
         if request.method == 'POST':
@@ -577,7 +577,7 @@ def edit_todo(request, classid):
             return redirect('/todo/{}?todoid=%i'.format(classid) % (todoid))
         #otherwise create a new To-Do
         else: 
-            document = ToDo.objects.create(title=title, description=description, due_date=due_date, cls=cls, completed=False)
+            document = ToDo.objects.create(title=title, description=description, due_date=due_date, cls=cls, completed=False, user=request.user)
 
             return redirect('/todo/{}?todoid=%i'.format(classid) % (document.id))
 
@@ -602,6 +602,55 @@ def edit_todo(request, classid):
     if (formatted_date != ""):
         context["date"] = formatted_date
     return render(request, 'notes/todo.html',context)  
+
+# a view to change (or create a new) to-do
+def edit_todo_no_class(request):
+    #get the relevant to-do (or open up a new one)
+    todoid = int(request.GET.get('todoid',0))
+    #get all the non class to-do items to display in the to-do list
+    todo = ToDo.objects.filter(user=request.user,cls_isnull=True)
+    #when they submit
+    if request.method == 'POST':
+        #grab the data
+        todoid = int(request.POST.get('tdid',0))
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        due_date = request.POST.get('due_date')
+        # if they are changing an existing todo update all the fields
+        if todoid > 0:
+            document = ToDo.objects.get(pk=todoid)
+            document.title = title
+            document.description = description
+            document.due_date = due_date
+            document.save()
+
+            return redirect('/todo/?todoid=%i' % (todoid))
+        #otherwise create a new To-Do
+        else: 
+            document = ToDo.objects.create(title=title, description=description, due_date=due_date, completed=False, user=request.user)
+
+            return redirect('/todo/?todoid=%i' % (document.id))
+
+    formatted_date = ""
+
+    #if a to-do is selected grab its description and format its due date
+    if todoid > 0:
+        document = ToDo.objects.get(pk=todoid)
+        
+        # get and format the due date
+        formatted_date = document.due_date.strftime("%Y-%m-%d")
+    #otherwise make it empty
+    else:
+        document = ''
+
+    context = {
+        'todoid' : todoid,
+        'todo' : todo,
+        'document' : document,
+    }
+    if (formatted_date != ""):
+        context["date"] = formatted_date
+    return render(request, 'notes/todo.html',context)
 
 # delete a to-do
 def delete_todo(request, todoid):

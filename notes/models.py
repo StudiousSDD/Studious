@@ -4,6 +4,7 @@ from django.utils import timezone
 from ckeditor.widgets import CKEditorWidget
 
 from schedule.models.events import Event, Occurrence
+from django.contrib.auth.models import User
 
 
 # Create your models here.
@@ -42,8 +43,8 @@ class Lecture(models.Model):
 
     lecture_number = models.IntegerField(default=0)
     def __str__(self):
-        title = " Lecture #{}"
-        return self.cls.__str__() + title.format(self.lecture_number)
+        title = " Lecture {}"
+        return title.format(self.lecture_number) + "    (" + self.occurrence.start.strftime('%D') + ")"
     
 # a Note is assocciated with a Lecture, each Leture can have many Notes
 # A Note has a title, the text held within it, and dates of creation and modification
@@ -81,6 +82,7 @@ class ArchivedNote(models.Model):
 # it has a title, duedate, description and completed boolean value
 class ToDo(models.Model):
     cls = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
     title = models.CharField(max_length=255)
     description = models.TextField()

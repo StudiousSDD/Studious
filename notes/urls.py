@@ -28,5 +28,6 @@ urlpatterns = [
     path('create_lecture/', views.create_lecture, name='create_lecture'),
 
     path('todo/<int:classid>', views.edit_todo, name="edit_todo"),
+    path('todo/', views.edit_todo_no_class, name="edit_todo_no_class"),
     path('delete_todo/<int:todoid>', views.delete_todo, name='delete_todo'),
 ]

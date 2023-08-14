@@ -43,8 +43,13 @@
                     <ul class="menu-list">
                         {% for td in todo %}
                         <li>
+                            {% if cls %}
                             <a href="{% url 'notes:edit_todo' cls.id %}?todoid={{ td.id }}"
                                 id="todo_link" sort_by="sort_by">{{td.title}}</a>
+                            {% else %}
+                              <a href="{% url 'notes:edit_todo_no_class' %}?todoid={{ td.id }}"
+                                id="todo_link" sort_by="sort_by">{{td.title}}</a>
+                            {% endif %}
                         </li>
                         {% endfor %}
                     </ul>
@@ -53,9 +58,7 @@
             <form method="post" action="{% url 'notes:edit_todo' cls.id %}?todoid={{ todoid }}">
                 {% csrf_token %}
                 <input type="hidden" name="tdid" value="{{ todoid }}">
-    
-                <form method="post"
-                    action="{% url 'notes:edit_todo' cls.id %}?todoid={{ todoid }}">
+                <form method="post" action="{% url 'notes:edit_todo' cls.id %}?todoid={{ todoid }}">
                     {% csrf_token %}
                     <input type="hidden" name="tdid" value="{{todoid}}">
                     <div class="field">
@@ -64,7 +67,7 @@
                         </label>
                         <div class="control">
                             <input type="text" class="input" name="title" placeholder="Title" {% if todo %}
-                                value="{{document.title}}" {% endif %} required>
+                                value="{{document.title}}" {% endif %}>
                         </div>
 
 
@@ -74,15 +77,6 @@
                                 <textarea name="description" placeholder="Description"> {% if todo %}{{document.description}}{% endif %}</textarea>
                             </div>
                         </div>
-
-                        <div class="field">
-                            <label class="label">Due Date</label>
-
-                            <div class="control">
-                                <input type="date" name="due_date" {% if date %}value = "{{date}}"{% endif %} required>
-                            </div>
-                        </div>
-
                         <div class="field is-grouped">
                             <div class="control">
                                 <button class="button is-primary">Save</button>
@@ -96,12 +90,12 @@
                             {% endif %}
                         </div>
                     </div>
-                    </form>
                 </form>
+            </form>
             </div>
         </div>
     </section>
-
+    
 </body>
 
 </html>
