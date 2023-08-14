@@ -52,7 +52,7 @@ def editor(request, lectureid):
         title = request.POST.get('title')
         content = request.POST.get('content')
 
-        form = NoteForm(request.POST)
+        form = NoteForm(request.POST, username=request.user.username)
         delete_tag = request.POST.get('delete_tag')
 
         hue = int(request.POST.get('hue'))
@@ -70,8 +70,9 @@ def editor(request, lectureid):
                 tag_to_delete.delete()
             
             if new_tag:
-                tag = Tag.objects.get_or_create(name=new_tag, user=request.user)
-                # document.tag = tag
+                tag, worked = Tag.objects.get_or_create(name=new_tag, user=request.user)
+                if (not worked):
+                    tag = None
             else: 
                 try:
                     tag = Tag.objects.get(name=tag, user=request.user)
@@ -80,7 +81,6 @@ def editor(request, lectureid):
 
             # updates existing note
             if noteid > 0:
-                # document = Note.objects.get(pk=noteid) # Change document 
                 document.title = title
                 document.content = content
                 document.color = color
@@ -99,9 +99,9 @@ def editor(request, lectureid):
                 'content': document.content,
                 'tag': document.tag,
             }
-            form = NoteForm(initial=initial_data, instance=document)
+            form = NoteForm(initial=initial_data, instance=document, username=request.user.username)
         else:
-            form = NoteForm()
+            form = NoteForm(username=request.user.username)
 
     context = {
         'lecture' : lec,
