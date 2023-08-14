@@ -67,9 +67,16 @@ class EditEventForm(ModelForm):
 # allow users to select a tag or create a new tag for each note
 class NoteForm(forms.ModelForm):
     new_tag = forms.CharField(max_length=100, required=False, label="Create New Tag", widget=forms.TextInput(attrs={'placeholder': 'e.g., homework'}))
-    tag = forms.ModelChoiceField(queryset=Tag.objects.all(), required=False, label="Select Tag")
     delete_tag = forms.BooleanField(required=False, label="Delete Tag")
 
     class Meta:
         model = Note
         fields = ['title', 'content', 'tag']
+
+    def __init__(self, *args, **kwargs):
+        username = kwargs.pop('username', None)
+        super(NoteForm, self).__init__(*args, **kwargs)
+
+        qset = Tag.objects.filter(user__username=username)
+        self.fields["tag"] = forms.ModelChoiceField(queryset=qset, required=False, label="Select Tag")
+        
