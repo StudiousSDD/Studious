@@ -64,7 +64,7 @@
                         </label>
                         <div class="control">
                             <input type="text" class="input" name="title" placeholder="Title" {% if todo %}
-                                value="{{document.title}}" {% endif %}>
+                                value="{{document.title}}" {% endif %} required>
                         </div>
 
 
@@ -73,6 +73,14 @@
 
                             <div class="control">
                                 <textarea name="description" placeholder="Description"> {% if todo %}{{document.description}}{% endif %}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Due Date</label>
+
+                            <div class="control">
+                                <input type="date" name="due_date" value = "{{date}}" required>
                             </div>
                         </div>
 
