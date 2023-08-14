@@ -80,7 +80,7 @@
                             <label class="label">Due Date</label>
 
                             <div class="control">
-                                <input type="date" name="due_date" value = "{{date}}" required>
+                                <input type="date" name="due_date" {% if date %}value = "{{date}}"{% endif %} required>
                             </div>
                         </div>
 

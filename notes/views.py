@@ -540,7 +540,6 @@ def todo_api(request):
                 "color": class_color,
                 "url": url,
             }
-            print (fullcal_obj)
             response_data.append(fullcal_obj)
         
     return JsonResponse(response_data, safe=False)
@@ -595,6 +594,8 @@ def edit_todo(request, classid):
 
             return redirect('/todo/{}?todoid=%i'.format(classid) % (document.id))
 
+    formatted_date = ""
+
     #if a to-do is selected grab its description and format its due date
     if todoid > 0:
         document = ToDo.objects.get(pk=todoid)
@@ -610,6 +611,7 @@ def edit_todo(request, classid):
         'todoid' : todoid,
         'todo' : todo,
         'document' : document,
-        'date' : formatted_date,
     }
+    if (formatted_date != ""):
+        context["date"] = formatted_date
     return render(request, 'notes/todo.html',context)  
