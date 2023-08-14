@@ -4,13 +4,14 @@ from django.utils import timezone
 from ckeditor.widgets import CKEditorWidget
 
 from schedule.models.events import Event, Occurrence
+from django.contrib.auth.models import User
 
 
 # Create your models here.
 
 # to represent and manage tags 
 class Tag(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=31)
 
     def __str__(self):
         return self.name
@@ -22,7 +23,7 @@ class Tag(models.Model):
 class Class(models.Model):
     calendar_event = models.OneToOneField(Event, on_delete=models.CASCADE, null=True)
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=31)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -55,8 +56,8 @@ class Lecture(models.Model):
 
     lecture_number = models.IntegerField(default=0)
     def __str__(self):
-        title = " Lecture #{}"
-        return self.cls.__str__() + title.format(self.lecture_number)
+        title = " Lecture {}"
+        return title.format(self.lecture_number) + "    (" + self.occurrence.start.strftime('%D') + ")"
     
 # a Note is assocciated with a Lecture, each Leture can have many Notes
 # A Note has a title, the text held within it, and dates of creation and modification
@@ -66,11 +67,11 @@ class Note(models.Model):
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE, null=True)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, null=True)
     
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=31)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-    color = models.CharField(max_length=255)
+    color = models.CharField(max_length=16)
 
     class Meta:
         ordering = ('title',) # Order by title alphabetically 
@@ -83,7 +84,7 @@ class Note(models.Model):
 class ArchivedNote(models.Model):
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE, null=True)
     
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=31)
     content = models.TextField()
     archived_at = models.DateTimeField(auto_now_add=True)
 
@@ -94,8 +95,9 @@ class ArchivedNote(models.Model):
 # it has a title, duedate, description and completed boolean value
 class ToDo(models.Model):
     cls = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=31)
     description = models.TextField()
     due_date = models.DateField(null=True)
     completed = models.BooleanField()
