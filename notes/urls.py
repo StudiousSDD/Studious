@@ -14,6 +14,7 @@ urlpatterns = [
     path('archive_document/<int:noteid>/', views.archive_document, name='archive_document'),
 
     path('eventapi', views.occurrence_api, name="eventapi"),
+    path('todoapi', views.todo_api, name="todoapi"),
 
     path('import_class/', views.import_class, name='import_class'),
     path('notes/<int:lectureid>', views.editor, name='editor'),
@@ -29,4 +30,5 @@ urlpatterns = [
     path('create_lecture/', views.create_lecture, name='create_lecture'),
 
     path('todo/<int:classid>', views.edit_todo, name="edit_todo"),
+    path('delete_todo/<int:todoid>', views.delete_todo, name='delete_todo'),
 ]

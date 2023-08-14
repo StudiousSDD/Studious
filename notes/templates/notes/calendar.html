@@ -62,10 +62,21 @@
               failure: function() {
                 alert('There was an error while fetching events!');
               }
+            },
+            {
+              url: "{% url 'notes:todoapi' %}",
+              method: 'GET',
+              extraParams: {
+                calendar_slug: '{{user.username}}',
+
+              },
+              failure: function() {
+                alert('There was an error while fetching events!');
+              }
             }
           ],
           eventClick: function(info) {
-            window.open( '/class/' + info.event.title, target="_self")
+            window.open( '/class/' + info.event.title, target="_self");
           },
         });
         calendar.render();

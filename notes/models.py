@@ -64,7 +64,7 @@ class Lecture(models.Model):
 # a Note displays as 'Lecture display' 'Note title' i.e. SD&D Lecture 1 First Day Notes
 class Note(models.Model):
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE, null=True)
-    tag = models.ForeignKey(Tag, on_delete=models.SET_NULL, null=True)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, null=True)
     
     title = models.CharField(max_length=255)
     content = models.TextField()
@@ -90,11 +90,14 @@ class ArchivedNote(models.Model):
     def __str__(self):
         return self.title.__str__() 
 
+# a to-do item is associated with a class
+# it has a title, duedate, description and completed boolean value
 class ToDo(models.Model):
     cls = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
 
     title = models.CharField(max_length=255)
     description = models.TextField()
+    due_date = models.DateField(null=True)
     completed = models.BooleanField()
     def __str__(self) -> str:
         return self.title
