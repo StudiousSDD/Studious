@@ -2,6 +2,12 @@
 <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
 <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
 <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'css/slider.css' %}" rel="stylesheet" type="text/css">
+
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
 
 <style>
     li.container {
@@ -56,10 +62,10 @@
                             </li>
                             {% endfor %}
                         </ul>
+                        {% if archived_notes %}
                         <p class="menu-label">Archived Notes</p>
                         <ul class="menu-list">
                             {% for n in archived_notes %}
-                       
                                 <li class ="container">{{n.title}}
                                     <form method="post" action="{% url 'notes:delete_archived_note' n.id %}">
                                         {% csrf_token %}
@@ -69,11 +75,10 @@
                                         {% csrf_token %}
                                         <button type="submit">Restore</button>
                                     </form>
-                                </li>
-
-                                
+                                </li>      
                             {% endfor %}
                         </ul>
+                        {% endif %}
                     </aside>
                 </div>
 
@@ -84,8 +89,12 @@
                 <input type="hidden" name="noteid" value="{{ noteid }}">
                 <input type="hidden" name="sort_by" value="{{ sort_by }}">
                 
-                <!-- Add a color picker input -->
-                <input type="color" id="colorInput" name="color" value="{{ document.color }}" required>
+                <div class="fieldWrapper input-group mb-3">
+                    <span class="input-group-text choose-color" id="choose-color">Color</span>
+                    <input type="range" min=0 max=359 step=1 class="slider" id="id_color" name="hue" value="{{hue}}">
+                    <script src="{% static 'js/slider.js' %}"></script>
+                </div>
+              
                 <div class="column is-10" style="background-color: {{ document.color }}">
     
                     <form method="post"
@@ -97,7 +106,7 @@
                             <label class="label">
                                 Title
                                 {%if document%}
-                                <span class="has-text-grey-light" style="float:right">
+                                <span class="has-text-gray" style="float:right">
                                     Created at: {{ document.created_at|date:"m/d/Y"}} |
                                     Modified at: {{ document.modified_at|date:"m/d/Y"}}
                                 </span>

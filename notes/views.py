@@ -54,7 +54,9 @@ def editor(request, lectureid):
 
         form = NoteForm(request.POST)
         delete_tag = request.POST.get('delete_tag')
-        color = request.POST.get('color')
+
+        hue = int(request.POST.get('hue'))
+        color = hue_to_pastel(hue)
       
         if form.is_valid():
             title = form.cleaned_data['title']
@@ -106,6 +108,7 @@ def editor(request, lectureid):
         'noteid' : noteid,
         'note' : note,
         'document' : document,
+        'hue' : hex_to_hue(document.color),
         'sort_by' : sort_by,
         'archived_notes' : archived_notes,
         'form': form,
@@ -153,21 +156,39 @@ def view_class(request, classid):
     #if the user is signed in
     if (request.user.is_authenticated):
         #gather all their classes as well as the specific class
-        classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id, archived=False)
-        archived_classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id, archived=True)
+        classes = Class.objects.filter(user=request.user, archived=False)
+        archived_classes = Class.objects.filter(user=request.user, archived=True)
         class_instance = Class.objects.get(name=classid)
         
         #get all the lectures for that class
         lecture_queryset = class_instance.lecture_set.all()
-
+                
         #sort the notes
         sort_by = request.GET.get('sort_by', 'latest')  # Default to sorting by latest
         if sort_by == 'latest':
             lecture_queryset = class_instance.lecture_set.order_by('-lecture_number')
         elif sort_by == 'earliest':
             lecture_queryset = class_instance.lecture_set.order_by('lecture_number')
+        
         #get all the to-do items
         todos = class_instance.todo_set.all()
+
+        #if they submit a change to the to-dos
+        if request.method == 'POST':
+            #gather all the checked items
+            tdids_str = request.POST.getlist('checkbox_data')
+            tdids = []
+            for s in tdids_str:
+                tdids.append(int(s))
+            for td in todos:
+                #if the to-do should be checked make it
+                if td.id in tdids:
+                    td.completed = True
+                #otherwise uncheck it
+                else:
+                    td.completed = False
+                #save the object    
+                td.save()
 
         context = {
             'classes' : classes,

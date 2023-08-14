@@ -96,10 +96,13 @@
               <input type="checkbox" value={{t.id}} name="checkbox_data" {% if t.completed %} checked {% endif %} >
             </a>
             {% endfor %}
+            {% if ToDos %}
             <input type="submit" value="submit">
+            {% endif %}
           </form>
         </div>
         <div class="mb-5">
+          {% if archived_classes %}
           <h2 class="container">
             Archived Classes
           </h2>
@@ -122,6 +125,7 @@
             </div>
             {% endfor %}
           </div>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -150,11 +154,12 @@
           <h2>{{lecture}}</h2>
         </div>
       </div>
-      <ul class="unstyled-list">
+      <div class="list-group">
         {% for note in lecture.note_set.all %}
-        <li><a href="{% url 'notes:editor' lecture.id %}?noteid={{note.id}}">{{note.title}}</a></li>
+        <a class="list-group-item list-group-item-action"
+          style="background-color: {{ note.color }}" href="{% url 'notes:editor' lecture.id %}?noteid={{note.id}}">{{ note.title }}</a>
         {% endfor %}
-      </ul>
+      </div>
       <div class="col-5">
         <a href="{% url 'notes:editor' lecture.id %}">New Note</a>
       </div>

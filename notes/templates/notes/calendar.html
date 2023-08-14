@@ -146,7 +146,9 @@
           </a>
           {% endif %}
           {% endfor %}
+          {% if ToDos %}
           <input type="submit" value="submit">
+          {% endif %}
         </form>
         <h2>
           <a href="{% url 'notes:edit_todo_no_class' %}" class="addClassLink">
