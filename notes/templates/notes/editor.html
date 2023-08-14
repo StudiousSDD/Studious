@@ -24,8 +24,8 @@
 <body>
     <nav class="navbar is-dark">
         <div class="navbar-brand">
-            <a href="{% url 'notes:home_page' %}" class="navbar-item"
-                style="background-color: {{ c.calendar_event.color_event }}">Home</a>
+            <a href="{% url 'notes:view_class' lecture.cls.name %}" class="navbar-item"
+                style="background-color: {{ c.calendar_event.color_event }}">{{lecture.cls}}</a>
 
         </div>
         <div class="navbar-menu">
@@ -137,7 +137,7 @@
 
                                 <div class="control">
                                     <textarea class="ckeditor" name="content"
-                                        placeholder="Content"> {% if note %}{{document.content}}{% endif %}</textarea>
+                                        placeholder="Content">{% if note %}{{document.content}}{% endif %}</textarea>
                                 </div>
                             </div>
 

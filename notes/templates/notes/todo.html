@@ -24,13 +24,21 @@
 <body>
     <nav class="navbar is-dark">
         <div class="navbar-brand">
-            <a href="{% url 'notes:home_page' %}" class="navbar-item"
+          {% if cls %}
+          <a href="{% url 'notes:view_class' cls.name %}" class="navbar-item"
+                style="background-color: {{ c.calendar_event.color_event }}">{{cls}}</a>
+          {% else %}
+          <a href="{% url 'notes:home_page' %}" class="navbar-item"
                 style="background-color: {{ c.calendar_event.color_event }}">Home</a>
-
+          {% endif %}
         </div>
         <div class="navbar-menu">
             <div class="navbar-end">
+                {% if cls %}
                 <a href="{% url 'notes:edit_todo' cls.id %}?todoid=0" class="navbar-item">New ToDo</a>
+                {% else %}
+                <a href="{% url 'notes:edit_todo_no_class' %}?todoid=0" class="navbar-item">New ToDo</a>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -39,22 +47,23 @@
         <div class="columns">
             <div class="column is-2">
                 <aside class="menu">
-                    <p class="menu-label">ToDo</p>
+                    <p class="menu-label">ToDo List</p>
                     <ul class="menu-list">
                         {% for td in todo %}
                         <li>
                             {% if cls %}
                             <a href="{% url 'notes:edit_todo' cls.id %}?todoid={{ td.id }}"
-                                id="todo_link" sort_by="sort_by">{{td.title}}</a>
+                                id="todo_link">{{td.title}}</a>
                             {% else %}
                               <a href="{% url 'notes:edit_todo_no_class' %}?todoid={{ td.id }}"
-                                id="todo_link" sort_by="sort_by">{{td.title}}</a>
+                                id="todo_link">{{td.title}}</a>
                             {% endif %}
                         </li>
                         {% endfor %}
                     </ul>
                 </aside>
             </div>
+            {% if cls %}
             <form method="post" action="{% url 'notes:edit_todo' cls.id %}?todoid={{ todoid }}">
                 {% csrf_token %}
                 <input type="hidden" name="tdid" value="{{ todoid }}">
@@ -74,9 +83,18 @@
                         <div class="field">
                             <label class="label">Desciption</label>
                             <div class="control">
-                                <textarea name="description" placeholder="Description"> {% if todo %}{{document.description}}{% endif %}</textarea>
+                                <textarea name="description" placeholder="Description">{% if todo %}{{document.description}}{% endif %}</textarea>
                             </div>
                         </div>
+
+                        <div class="field">
+                          <label class="label">Due Date</label>
+
+                          <div class="control">
+                              <input type="date" name="due_date" {% if date %}value = "{{date}}"{% endif %} required>
+                          </div>
+                        </div>
+
                         <div class="field is-grouped">
                             <div class="control">
                                 <button class="button is-primary">Save</button>
@@ -92,6 +110,54 @@
                     </div>
                 </form>
             </form>
+            {% else %}
+            <form method="post" action="{% url 'notes:edit_todo_no_class' %}?todoid={{ todoid }}">
+              {% csrf_token %}
+              <input type="hidden" name="tdid" value="{{ todoid }}">
+              <form method="post" action="{% url 'notes:edit_todo_no_class' %}?todoid={{ todoid }}">
+                  {% csrf_token %}
+                  <input type="hidden" name="tdid" value="{{todoid}}">
+                  <div class="field">
+                      <label class="label">
+                          Title
+                      </label>
+                      <div class="control">
+                          <input type="text" class="input" name="title" placeholder="Title" {% if todo %}
+                              value="{{document.title}}" {% endif %}>
+                      </div>
+
+
+                      <div class="field">
+                          <label class="label">Desciption</label>
+                          <div class="control">
+                              <textarea name="description" placeholder="Description"> {% if todo %}{{document.description}}{% endif %}</textarea>
+                          </div>
+                      </div>
+
+                      <div class="field">
+                        <label class="label">Due Date</label>
+
+                        <div class="control">
+                            <input type="date" name="due_date" {% if date %}value = "{{date}}"{% endif %} required>
+                        </div>
+                      </div>
+
+                      <div class="field is-grouped">
+                          <div class="control">
+                              <button class="button is-primary">Save</button>
+                          </div>
+                          {% if document %}
+                              <div class="control">
+                                  <a href="{% url 'notes:delete_todo' todoid %}"
+                                      class="button is-danger archive-button"
+                                      onclick="return confirm('Are you sure you want to delete this todo item?')">Delete</a>
+                              </div>
+                          {% endif %}
+                      </div>
+                  </div>
+              </form>
+            </form>
+            {% endif %}
             </div>
         </div>
     </section>

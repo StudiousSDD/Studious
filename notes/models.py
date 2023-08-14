@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 
 # to represent and manage tags 
 class Tag(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=31)
 
     def __str__(self):
         return self.name
@@ -23,7 +23,7 @@ class Tag(models.Model):
 class Class(models.Model):
     calendar_event = models.OneToOneField(Event, on_delete=models.CASCADE, null=True)
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=31)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -54,11 +54,11 @@ class Note(models.Model):
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE, null=True)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, null=True)
     
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=31)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-    color = models.CharField(max_length=255)
+    color = models.CharField(max_length=16)
 
     class Meta:
         ordering = ('title',) # Order by title alphabetically 
@@ -71,7 +71,7 @@ class Note(models.Model):
 class ArchivedNote(models.Model):
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE, null=True)
     
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=31)
     content = models.TextField()
     archived_at = models.DateTimeField(auto_now_add=True)
 
@@ -84,7 +84,7 @@ class ToDo(models.Model):
     cls = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=31)
     description = models.TextField()
     due_date = models.DateField(null=True)
     completed = models.BooleanField()

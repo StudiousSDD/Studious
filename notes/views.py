@@ -518,17 +518,17 @@ def todo_api(request):
         user_class = Class.objects.get(calendar_event=e)
         class_color = e.color_event
         
-        todo_items = ToDo.objects.filter(cls=user_class)
-        for i in todo_items:
-            url = reverse('notes:view_class', args=[user_class.name])
+        todo_items = ToDo.objects.filter(user=request.user)
+    for i in todo_items:
+            url = reverse('notes:view_class', args=[i.cls.name]) if i.cls else reverse('notes:home_page')
+            color = i.cls.calendar_event.color_event if i.cls else '#808080'
             fullcal_obj = {
                 "title": i.title,
                 "start": i.due_date,
-                "color": class_color,
+                "color": color,
                 "url": url,
             }
-            response_data.append(fullcal_obj)
-        
+            response_data.append(fullcal_obj)    
     return JsonResponse(response_data, safe=False)
 
 # a function to change the color of a notes background
@@ -608,7 +608,7 @@ def edit_todo_no_class(request):
     #get the relevant to-do (or open up a new one)
     todoid = int(request.GET.get('todoid',0))
     #get all the non class to-do items to display in the to-do list
-    todo = ToDo.objects.filter(user=request.user,cls_isnull=True)
+    todo = ToDo.objects.filter(user=request.user,cls__isnull=True)
     #when they submit
     if request.method == 'POST':
         #grab the data
