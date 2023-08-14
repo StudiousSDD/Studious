@@ -68,15 +68,16 @@ def editor(request, lectureid):
             if new_tag:
                 tag, created = Tag.objects.get_or_create(name=new_tag)
             elif delete_tag == 'on':
-                if document.tag is not None:
-                    if selected_tag == document.tag.name:
-                        document.tag.delete()
                 if not selected_tag:
                     tag = document.tag
                 else:
-                    tag_deleted = Tag.objects.get(pk=selected_tag)
-                    tag_deleted.delete()
-                    tag = document.tag
+                    if document.tag is not None:
+                        tag_deleted = Tag.objects.get(pk=selected_tag)
+                        if tag_deleted == document.tag:
+                            document.tag.delete()
+                        else:
+                            tag_deleted.delete()
+                            tag = document.tag
             elif selected_tag:
                 tag = Tag.objects.get(pk=selected_tag)
 
