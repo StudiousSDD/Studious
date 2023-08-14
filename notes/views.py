@@ -6,12 +6,13 @@ from django.contrib import messages
 
 from icalendar import Calendar
 from datetime import datetime
-import colorsys, random, math
+import colorsys, random, math, pytz
 
 from .models import Note, Class, Lecture, ArchivedNote, Tag, ToDo
 from .forms import AddClass, AddEvent, ImportEvent, EditEventForm, NoteForm
 
 
+from schedule.models.calendars import Calendar
 from schedule.models.events import Event, Occurrence
 from schedule.models.rules import Rule
 
@@ -491,6 +492,46 @@ def occurrence_api(request):
     
     return redirect(f'/schedule/api/occurrences?calendar_slug={calendar_slug}&start={start}&end={end}&timezone={timezone}')
 
+# get set of to-do items to add to the calendar and return as a JSON file
+def todo_api(request):
+    start = request.GET.get("start").rstrip('Z')
+    end = request.GET.get("end").rstrip('Z')
+    timezone = request.GET.get("timeZone")
+    calendar_slug = request.GET.get("calendar_slug")
+
+    start = datetime.strptime(start, "%Y-%m-%dT%H:%M:%S")
+    end = datetime.strptime(end, "%Y-%m-%dT%H:%M:%S")
+
+    if timezone and timezone in pytz.common_timezones:
+        # make start and end dates aware in given timezone
+        current_tz = pytz.timezone(timezone)
+        start = current_tz.localize(start)
+        end = current_tz.localize(end)
+
+    cal = get_object_or_404(Calendar, slug=calendar_slug)
+    
+    response_data = []
+    
+    # finds all of the user's classes and adds the todo items from them
+    user_events = Event.objects.filter(calendar=cal)
+    for e in user_events:
+        user_class = Class.objects.get(calendar_event=e)
+        class_color = e.color_event
+        
+        todo_items = ToDo.objects.filter(cls=user_class)
+        for i in todo_items:
+            url = reverse('notes:view_class', args=[user_class.name])
+            fullcal_obj = {
+                "title": i.title,
+                "start": i.due_date,
+                "color": class_color,
+                "url": url,
+            }
+            print (fullcal_obj)
+            response_data.append(fullcal_obj)
+        
+    return JsonResponse(response_data, safe=False)
+
 # a function to change the color of a notes background
 def update_note_color(request):
     #when they submmit
@@ -525,23 +566,28 @@ def edit_todo(request, classid):
         todoid = int(request.POST.get('tdid',0))
         title = request.POST.get('title')
         description = request.POST.get('description')
+        due_date = request.POST.get('due_date')
         # if they are changing an existing todo update all the fields
         if todoid > 0:
             document = ToDo.objects.get(pk=todoid)
             document.title = title
             document.description = description
+            document.due_date = due_date
             document.save()
 
             return redirect('/todo/{}?todoid=%i'.format(classid) % (todoid))
         #otherwise create a new To-Do
         else: 
-            document = ToDo.objects.create(title=title, description=description, cls=cls, completed=False)
+            document = ToDo.objects.create(title=title, description=description, due_date=due_date, cls=cls, completed=False)
 
             return redirect('/todo/{}?todoid=%i'.format(classid) % (document.id))
 
-    #if a to-do is selected grab its description
+    #if a to-do is selected grab its description and format its due date
     if todoid > 0:
         document = ToDo.objects.get(pk=todoid)
+        
+        # get and format the due date
+        formatted_date = document.due_date.strftime("%Y-%m-%d")
     #otherwise make it empty
     else:
         document = ''
@@ -551,6 +597,7 @@ def edit_todo(request, classid):
         'todoid' : todoid,
         'todo' : todo,
         'document' : document,
+        'date' : formatted_date,
     }
     return render(request, 'notes/todo.html',context)  
 

@@ -78,13 +78,13 @@ class ArchivedNote(models.Model):
         return self.title.__str__() 
 
 # a to-do item is associated with a class
-# it has a title, description and completed
-# it is associated with a class
+# it has a title, duedate, description and completed boolean value
 class ToDo(models.Model):
     cls = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
 
     title = models.CharField(max_length=255)
     description = models.TextField()
+    due_date = models.DateField(null=True)
     completed = models.BooleanField()
     def __str__(self) -> str:
         return self.title
