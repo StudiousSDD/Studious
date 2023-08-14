@@ -25,7 +25,7 @@
     <nav class="navbar is-dark">
         <div class="navbar-brand">
           {% if cls %}
-          <a href="{% url 'notes:view_class' cls.name %}" class="navbar-item"
+          <a href="{% url 'notes:view_class' cls.id %}" class="navbar-item"
                 style="background-color: {{ c.calendar_event.color_event }}">{{cls}}</a>
           {% else %}
           <a href="{% url 'notes:home_page' %}" class="navbar-item"

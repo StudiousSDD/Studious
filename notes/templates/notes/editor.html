@@ -30,7 +30,7 @@
 <body>
     <nav class="navbar is-dark">
         <div class="navbar-brand">
-            <a href="{% url 'notes:view_class' lecture.cls.name %}" class="navbar-item"
+            <a href="{% url 'notes:view_class' lecture.cls.id %}" class="navbar-item"
                 style="background-color: {{ c.calendar_event.color_event }}">{{lecture.cls}}</a>
 
         </div>

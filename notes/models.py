@@ -64,7 +64,7 @@ class Note(models.Model):
         ordering = ('title',) # Order by title alphabetically 
 
     def __str__(self):
-        return self.lecture.__str__() + " " + self.title
+        return self.lecture.cls.__str__() + self.lecture.__str__() + " " + self.title
 
 # an ArchivedNote is a way to hold the important information of a Note
 # it is held separately to be restored or deleted later
@@ -76,7 +76,7 @@ class ArchivedNote(models.Model):
     archived_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.title.__str__() 
+        return self.title
 
 # a to-do item is associated with a class
 # it has a title, duedate, description and completed boolean value

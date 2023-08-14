@@ -90,7 +90,7 @@
         <h1>Class List</h1>
         <div class="list-group">
           {% for c in classes %}
-            <a class="list-group-item list-group-item-action" style="background-color: {{ c.calendar_event.color_event }}" href="/class/{{ c.name }}/">{{ c.name }}</a>
+            <a class="list-group-item list-group-item-action" style="background-color: {{ c.calendar_event.color_event }}" href="/class/{{ c.id }}/">{{ c.name }}</a>
           {% endfor %}
         </div>
         <h2>
