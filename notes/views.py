@@ -53,49 +53,48 @@ def editor(request, lectureid):
     if request.method == 'POST':
         form = NoteForm(request.POST)
 
-        # if form.is_valid():
-        #     title = form.cleaned_data['title']
-        #     content = form.cleaned_data['content']
-        #     new_tag = form.cleaned_data['new_tag']
-        #     selected_tag = form.cleaned_data['tag']
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            content = form.cleaned_data['content']
+            new_tag = form.cleaned_data['new_tag']
+            selected_tag = form.cleaned_data['tag']
 
-        delete_tag = request.POST.get('delete_tag')
-        selected_tag = request.POST.get('tag')
-        new_tag = request.POST.get('new_tag')
-        color = request.POST.get('color')
-        tag = None
-    
-        if new_tag:
-            tag, created = Tag.objects.get_or_create(name=new_tag)
-        elif delete_tag == 'on':
-            # selected_tag = form.cleaned_data['tag']
-            if document.tag is not None:
-                if selected_tag == document.tag.name:
-                    document.tag.delete()
-            if not selected_tag:
-                tag = document.tag
-            else:
-                tag_deleted = Tag.objects.get(pk=selected_tag)
-                tag_deleted.delete()
-                tag = document.tag
-        elif selected_tag:
-            tag = Tag.objects.get(pk=selected_tag)
+            delete_tag = request.POST.get('delete_tag')
+            selected_tag = request.POST.get('tag')
+            new_tag = request.POST.get('new_tag')
+            color = request.POST.get('color')
+            tag = None
+        
+            if new_tag:
+                tag, created = Tag.objects.get_or_create(name=new_tag)
+            elif delete_tag == 'on':
+                if document.tag is not None:
+                    if selected_tag == document.tag.name:
+                        document.tag.delete()
+                if not selected_tag:
+                    tag = document.tag
+                else:
+                    tag_deleted = Tag.objects.get(pk=selected_tag)
+                    tag_deleted.delete()
+                    tag = document.tag
+            elif selected_tag:
+                tag = Tag.objects.get(pk=selected_tag)
 
-        # if they are changing an existing note update all the fields
-        if noteid > 0:
-            document = Note.objects.get(pk=noteid) # Change document 
-            document.title = title
-            document.content = content
-            document.color = color
-            if tag is not None:
-                document.tag = tag
-            else:
-                document.tag = None
-            document.save()
-        else: 
-            document = Note.objects.create(title=title, content=content, lecture=lec, color=color, tag=tag)       
-            noteid = document.id
-        return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (noteid, sort_by))
+            # if they are changing an existing note update all the fields
+            if noteid > 0:
+                document = Note.objects.get(pk=noteid) # Change document 
+                document.title = title
+                document.content = content
+                document.color = color
+                if tag is not None:
+                    document.tag = tag
+                else:
+                    document.tag = None
+                document.save()
+            else: 
+                document = Note.objects.create(title=title, content=content, lecture=lec, color=color, tag=tag)       
+                noteid = document.id
+            return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (noteid, sort_by))
     else:
         if noteid > 0:
             initial_data = {
