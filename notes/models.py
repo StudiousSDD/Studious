@@ -30,6 +30,19 @@ class Class(models.Model):
         
     def __str__(self):
         return self.name
+    
+class ArchivedClass(models.Model):
+    calendar_event = models.OneToOneField(Event, on_delete=models.CASCADE, null=True)
+
+    name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    archived_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering=('name',)   #   Order by class name alphabetically? 
+        
+    def __str__(self):
+        return self.name
 
 # a Lecture needs an Occurence as it represents a single Class time
 # a Lecture is associated with a Class, each Class can have many Lectures

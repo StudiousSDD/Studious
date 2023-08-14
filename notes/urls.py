@@ -7,8 +7,10 @@ from . import views
 app_name = "notes"
 urlpatterns = [
     path("", views.home_calendar_view, name="home_page"),
-    path("class/<int:classid>/delete", views.delete_class, name="delete_class"),
-    path("class/<int:classid>/edit", views.edit_class, name="edit_class"),
+    path("archive_class/<int:classid>/", views.archive_class, name="archive_class"),
+    path("class/<int:classid>/edit_class", views.edit_class, name="edit_class"),
+    path("restore_class/<int:classid>/", views.restore_class, name="restore_class"),
+    path("delete_class/<int:classid>/", views.delete_class, name="delete_class"),
     path('archive_document/<int:noteid>/', views.archive_document, name='archive_document'),
 
     path('eventapi', views.occurrence_api, name="eventapi"),

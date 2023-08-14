@@ -6,7 +6,7 @@ from django.urls import reverse
 from icalendar import Calendar
 import colorsys, random, math
 
-from .models import Note, Class, Lecture, ArchivedNote, Tag, ToDo
+from .models import Note, Class, Lecture, ArchivedNote, Tag, ToDo, ArchivedClass
 from .forms import AddClass, AddEvent, ImportEvent, EditEventForm, NoteForm
 
 
@@ -133,6 +133,7 @@ def home_calendar_view(request):
     if (request.user.is_authenticated):
         all_classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id)
         todos = ToDo.objects.all();
+        archived_classes = ArchivedClass.objects.all()
 
         if request.method == 'POST':
             tdids_str = request.POST.getlist('checkbox_data')
@@ -149,6 +150,7 @@ def home_calendar_view(request):
         
         context = {
             'classes' : all_classes,
+            'archived_classes' : archived_classes,
             'ToDos'   : todos,
         }
               
@@ -161,6 +163,7 @@ def view_class(request, classid):
     if (request.user.is_authenticated):
         classes = Class.objects.filter(calendar_event__calendar_id=request.user.profile.calendar.id)
         class_instance = Class.objects.get(name=classid)
+        archived_classes = ArchivedClass.objects.all()
 
         lecture_queryset = class_instance.lecture_set.all()
         sort_by = request.GET.get('sort_by', 'latest')  # Default to sorting by latest
@@ -174,7 +177,8 @@ def view_class(request, classid):
             'classid' : class_instance,
             'sort_by' : sort_by,
             'lecture_queryset' : lecture_queryset,
-            'ToDos'   : todos
+            'ToDos'   : todos,
+            'archived_classes' : archived_classes,
         }
     else:
         context = None
@@ -347,10 +351,40 @@ def import_class(request):
             return redirect('/class/{}'.format(made[0]))
     return render(request, "notes/import_class.html",{'form': ImportEvent})
 
+# archive a class
+def archive_class(request, classid):
+    a_class = Class.objects.get(pk=classid)
+    a_name = a_class.name
+    a_event = a_class.calendar_event
+    a_date = a_class.created_at
+    
+    archived_class = ArchivedClass.objects.create(name=a_name,   
+                                                calendar_event=a_event,
+                                                created_at=a_date)
+    archived_class.save()
+    a_class.delete()
+    # a_event.delete()
+
+    # redirect to the home page
+    return redirect('/')
+
+# restore a class
+def restore_class(request, classid):
+    a_class = ArchivedClass.objects.get(pk=classid)
+    class_object = Class.objects.create(name=a_class.name, 
+                                        calendar_event=a_class.calendar_event, 
+                                        created_at=a_class.created_at)
+    class_object.save()
+    a_class.delete()
+    # redirect to the home page
+    return redirect('/')
+
 # delete a class
 def delete_class(request, classid):
-    a_class = Class.objects.get(pk=classid)
+    # print(ArchivedClass.objects.all())
+    a_class = ArchivedClass.objects.get(pk=classid)
     a_event = a_class.calendar_event
+    # a_event.rule.delete()
     a_class.delete()
     a_event.delete()
     # redirect to the home page
