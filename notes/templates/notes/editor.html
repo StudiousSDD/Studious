@@ -2,6 +2,12 @@
 <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
 <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
 <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'css/slider.css' %}" rel="stylesheet" type="text/css">
+
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
 
 <style>
     li.container {
@@ -24,8 +30,8 @@
 <body>
     <nav class="navbar is-dark">
         <div class="navbar-brand">
-            <a href="{% url 'notes:home_page' %}" class="navbar-item"
-                style="background-color: {{ c.calendar_event.color_event }}">Home</a>
+            <a href="{% url 'notes:view_class' lecture.cls.id %}" class="navbar-item"
+                style="background-color: {{ c.calendar_event.color_event }}">{{lecture.cls}}</a>
 
         </div>
         <div class="navbar-menu">
@@ -35,72 +41,62 @@
             </div>
         </div>
     </nav>
+        <section class="section">
+            <div class="columns">
+                <div class="column is-2">
+                    <p class="menu-label">Sort By</p>
+                    <aside class="menu">
+                        <select id="sort_by_select">
+                            <option value="title_asc">Title Ascending</option>
+                            <option value="title_desc">Title Descending</option>
+                            <option value="created_by_asc">Created By Ascending</option>
+                            <option value="created_by_desc">Created By Descending</option>
+                        </select>
+                        <p class="menu-label">Notes</p>
+                        <ul class="menu-list">
+                            {% for note in note %}
+                            <li>
+                                <a href="{% url 'notes:editor' lecture.id %}?noteid={{ note.id }}&sort_by={{ sort_by }}" id="note_link" sort_by="sort_by">{{note.title}}
+                                    <span class="tag">{{ note.tag }}</span>
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% if archived_notes %}
+                        <p class="menu-label">Archived Notes</p>
+                        <ul class="menu-list">
+                            {% for n in archived_notes %}
+                                <li class ="container">{{n.title}}
+                                    <form method="post" action="{% url 'notes:delete_archived_note' n.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" onclick="return confirm('Are you sure you want to delete this archived note?')">Delete</button>
+                                    </form>
+                                    <form method="post" action="{% url 'notes:restore_archived_note' n.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit">Restore</button>
+                                    </form>
+                                </li>      
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </aside>
+                </div>
 
-    <section class="section">
-        <div class="columns">
-            <div class="column is-2">
-                <p class="menu-label">Sort By</p>
-                <aside class="menu">
-                    <select id="sort_by_select">
-                        <option value="title_asc">Title Ascending</option>
-                        <option value="title_desc">Title Descending</option>
-                        <option value="created_by_asc">Created By Ascending</option>
-                        <option value="created_by_desc">Created By Descending</option>
-                    </select>
-                    <p class="menu-label">Notes</p>
-                    <ul class="menu-list">
-                        {% for note in note %}
-                        <li>
-                            <a href="{% url 'notes:editor' lecture.id %}?noteid={{ note.id }}&sort_by={{ sort_by }}"
-                                id="note_link" sort_by="sort_by">{{note.title}}</a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    <p class="menu-label">Archived Notes</p>
-                    <ul class="menu-list">
-                        {% for n in archived_notes %}
-
-                        <li class="container">{{n.title}}
-                            <form method="post" action="{% url 'notes:delete_archived_note' n.id %}">
-                                {% csrf_token %}
-                                <button type="submit"
-                                    onclick="return confirm('Are you sure you want to delete this archived note?')">Delete</button>
-                            </form>
-                            <form method="post" action="{% url 'notes:restore_archived_note' n.id %}">
-                                {% csrf_token %}
-                                <button type="submit">Restore</button>
-                            </form>
-                        </li>
-
-
-                        {% endfor %}
-                    </ul>
-                    <!-- Search form -->
-    <form method="get">
-        <input type="text" name="search" value="{{ search_query }}">
-        <button type="submit">Search</button>
-    </form>
-
-    <!-- Display search results -->
-    {% if search_results %}
-    <h2>Search Results:</h2>
-    <ul>
-        {% for title in search_results %}
-        <li>{{ title }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-                </aside>
-            </div>
+                <div class="column is-10">
+                    <form method="post" action="{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by={{ sort_by }}">
             <form method="post" action="{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by={{ sort_by }}">
                 {% csrf_token %}
                 <input type="hidden" name="noteid" value="{{ noteid }}">
                 <input type="hidden" name="sort_by" value="{{ sort_by }}">
-
-                <!-- Add a color picker input -->
-                <input type="color" id="colorInput" name="color" value="{{ document.color|default:'#ffffff'}}" required>
-                <div class="column is-10" style="background-color: {{ document.color|default:'#ffffff'}}">
-
+                
+                <div class="fieldWrapper input-group mb-3">
+                    <span class="input-group-text choose-color" id="choose-color">Color</span>
+                    <input type="range" min=0 max=359 step=1 class="slider" id="id_color" name="hue" value="{{hue}}">
+                    <script src="{% static 'js/slider.js' %}"></script>
+                </div>
+              
+                <div class="column is-10" style="background-color: {{ document.color }}">
+    
                     <form method="post"
                         action="{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by={{ sort_by }}">
                         {% csrf_token %}
@@ -110,7 +106,7 @@
                             <label class="label">
                                 Title
                                 {%if document%}
-                                <span class="has-text-grey-light" style="float:right">
+                                <span class="has-text-gray" style="float:right">
                                     Created at: {{ document.created_at|date:"m/d/Y"}} |
                                     Modified at: {{ document.modified_at|date:"m/d/Y"}}
                                 </span>
@@ -121,6 +117,28 @@
                                 <input type="text" class="input" name="title" placeholder="Title" {% if note %}
                                     value="{{document.title}}" {% endif %}>
                             </div>
+                        
+                        <!-- Creating or selecting tags -->
+                        <div class="field">
+                            <label class="label">Tags</label>                            
+                            <div class="control">
+                                {{ form.new_tag.label_tag }}
+                                {{ form.new_tag }}
+                            </div>
+
+                            <div class="control">
+                                {{ form.tag.label_tag }}
+                                {{ form.tag }}
+                            </div>
+                            
+                            <div class="control">
+                                {% if document.tag %}
+                                    Delete Tag:
+                                        <input type="checkbox" name="delete_tag" id="delete_tag">
+                                {% endif %}
+
+                            </div>
+                        </div>
 
 
                             <div class="field">
@@ -128,7 +146,7 @@
 
                                 <div class="control">
                                     <textarea class="ckeditor" name="content"
-                                        placeholder="Content"> {% if note %}{{document.content}}{% endif %}</textarea>
+                                        placeholder="Content">{% if note %}{{document.content}}{% endif %}</textarea>
                                 </div>
                             </div>
 
@@ -141,13 +159,15 @@
                                     <a href="{% url 'notes:archive_document' document.id %}"
                                         class="button is-danger archive-button">Archive Note</a>
                                 </div>
+                                <div class="control">
+                                    <a href="{% url 'notes:outline' lecture.id document.id %}" class="button is-secondary">Outline</a>
+                                </div>
                                 {% endif %}
-
-                            </div>
+                              </div>
                         </div>
                     </form>
+                </div>
             </form>
-        </div>
         </div>
     </section>
 
