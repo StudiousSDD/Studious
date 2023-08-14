@@ -25,6 +25,12 @@
     a.addClassLink:link{
       text-decoration: none;
     }
+
+    div.buttons {
+    display: inline-flex;
+    float: right;
+    height: 100%;
+    }
   </style>
 {% endblock %}
 
@@ -95,6 +101,28 @@
             <i class="fa-solid fa-file-import" style="color: white; align-self: center; justify-self: center; "></i>
           </a>
         </h2>
+      </div>
+      <div class="mb-5">
+        <h1>Archived Classes</h1>
+        <div class="class-list">
+
+        </div>
+        <div class="list-group">
+          {% for c in archived_classes %}
+          <div class="list-group-item" style="background-color: {{ c.calendar_event.color_event }}"
+            href="/class/{{ c.name }}/">
+            {{ c.name }}
+            <div class="buttons">
+              <a href ="{% url 'notes:restore_class' c.id %}">
+                <i class="fa-solid fa-trash-restore" style="color: grey; margin-right: 10px;"></i>
+              </a>
+              <a href="{% url 'notes:delete_class' c.id %}">
+                <i class="fa-solid fa-trash" style="color: grey"></i>
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
       </div>
       <div class="col-lg-12 col-6 mb-lg-3">
         <h1>To-do List</h1>
