@@ -384,12 +384,16 @@ def archive_class(request, classid):
     a_event = a_class.calendar_event
     a_date = a_class.created_at
     
+    # move to the archive calendar
+    archive_calendar = get_object_or_404(Calendar, slug="archive")
+    a_event.calendar = archive_calendar
+    a_event.save()
+    
     archived_class = ArchivedClass.objects.create(name=a_name,   
                                                 calendar_event=a_event,
                                                 created_at=a_date)
     archived_class.save()
     a_class.delete()
-    # a_event.delete()
 
     # redirect to the home page
     return redirect('/')
@@ -397,8 +401,14 @@ def archive_class(request, classid):
 # restore a class
 def restore_class(request, classid):
     a_class = ArchivedClass.objects.get(pk=classid)
+    
+    a_event = a_class.calendar_event
+    user_calendar = request.user.profile.calendar
+    a_event.calendar = user_calendar
+    a_event.save()
+    
     class_object = Class.objects.create(name=a_class.name, 
-                                        calendar_event=a_class.calendar_event, 
+                                        calendar_event=a_event, 
                                         created_at=a_class.created_at)
     class_object.save()
     a_class.delete()
