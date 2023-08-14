@@ -82,7 +82,8 @@
                             {% if document %}
                                 <div class="control">
                                     <a href="{% url 'notes:delete_todo' todoid %}"
-                                        class="button is-danger archive-button">Delete</a>
+                                        class="button is-danger archive-button"
+                                        onclick="return confirm('Are you sure you want to delete this todo item?')">Delete</a>
                                 </div>
                             {% endif %}
                         </div>
