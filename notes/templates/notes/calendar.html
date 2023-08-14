@@ -25,6 +25,12 @@
     a.addClassLink:link{
       text-decoration: none;
     }
+
+    div.buttons {
+    display: inline-flex;
+    float: right;
+    height: 100%;
+    }
   </style>
 {% endblock %}
 
@@ -56,10 +62,21 @@
               failure: function() {
                 alert('There was an error while fetching events!');
               }
+            },
+            {
+              url: "{% url 'notes:todoapi' %}",
+              method: 'GET',
+              extraParams: {
+                calendar_slug: '{{user.username}}',
+
+              },
+              failure: function() {
+                alert('There was an error while fetching events!');
+              }
             }
           ],
           eventClick: function(info) {
-            window.open( '/class/' + info.event.title, target="_self")
+            window.open( '/class/' + info.event.title, target="_self");
           },
         });
         calendar.render();
@@ -73,7 +90,7 @@
         <h1>Class List</h1>
         <div class="list-group">
           {% for c in classes %}
-            <a class="list-group-item list-group-item-action" style="background-color: {{ c.calendar_event.color_event }}" href="/class/{{ c.name }}/">{{ c.name }}</a>
+            <a class="list-group-item list-group-item-action" style="background-color: {{ c.calendar_event.color_event }}" href="/class/{{ c.id }}/">{{ c.name }}</a>
           {% endfor %}
         </div>
         <h2>
@@ -85,26 +102,59 @@
           </a>
         </h2>
       </div>
+      {% if archived_classes %}
+        <div class="mb-5">
+        <h1>Archived Classes</h1>
+        <div class="class-list">
+
+        </div>
+        <div class="list-group">
+          {% for c in archived_classes %}
+          <div class="list-group-item" style="background-color: {{ c.calendar_event.color_event }}"
+            href="/class/{{ c.name }}/">
+            {{ c.name }}
+            <div class="buttons">
+              <a href ="{% url 'notes:restore_class' c.id %}">
+                <i class="fa-solid fa-trash-restore" style="color: grey; margin-right: 10px;"></i>
+              </a>
+              <a href="{% url 'notes:delete_class' c.id %}">
+                <i class="fa-solid fa-trash" style="color: grey"></i>
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {%endif%}
+
       <div class="col-lg-12 col-6 mb-lg-3">
         <h1>To-do List</h1>
-        <ul class="list-group">
-          <li class="list-group-item">
-            <input class="form-check-input me-1" type="checkbox" value="">
-            Look over lecture notes for Class 2
-          </li>
-          <li class="list-group-item">
-            <input class="form-check-input me-1" type="checkbox" value="">
-            Start homework for Class 1
-          </li>
-          <li class="list-group-item">
-            <input class="form-check-input me-1" type="checkbox" value="">
-            Finish take-home exam for Class 3
-          </li>
-          <li class="list-group-item">
-            <input class="form-check-input me-1" type="checkbox" value="">
-            <input class="border-0" type="text" placeholder="New to-do item...">
-          </li>
-        </ul>
+        <form action = '' method='post'>
+          {% csrf_token %}
+          {% for t in ToDos %}
+          {% if t.cls %}
+          <a class="list-group-item list-group-item-action" 
+            style="background-color: {{ t.cls.calendar_event.color_event }}"  href="{% url 'notes:edit_todo' t.cls.id %}?todoid={{t.id}}">
+            {{t.title}}
+            <input type="checkbox" value={{t.id}} name="checkbox_data" {% if t.completed %} checked {% endif %}><br>
+          </a>
+          {% else %}
+          <a class="list-group-item list-group-item-action" 
+            style="background-color: gray"  href="{% url 'notes:edit_todo_no_class' %}?todoid={{t.id}}">
+            {{t.title}}
+            <input type="checkbox" value={{t.id}} name="checkbox_data" {% if t.completed %} checked {% endif %}><br>
+          </a>
+          {% endif %}
+          {% endfor %}
+          {% if ToDos %}
+          <input type="submit" value="submit">
+          {% endif %}
+        </form>
+        <h2>
+          <a href="{% url 'notes:edit_todo_no_class' %}" class="addClassLink">
+            <i class="fa-solid fa-plus" style="color: white; align-self: center; justify-self: center; "></i>
+          </a>
+        </h2>
       </div>
     </div>
   </div>

@@ -1,0 +1,106 @@
+{% load static %}
+<link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+  <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
+  <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+
+  <style>
+    li.container {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    </style>
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Notes</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+    </head>
+
+    <body>
+        <nav class="navbar is-dark">
+            <div class="navbar-brand">
+                <a href="{% url 'notes:home_page' %}" class="navbar-item">Home</a>
+            </div>
+            <div class="navbar-menu">
+                <div class="navbar-end">
+                    <a href="{% url 'notes:editor' lecture.id %}?noteid=0&sort_by={{ sort_by }}" class="navbar-item">New Note</a>
+                </div>
+            </div>
+        </nav>
+
+        <section class="section">
+            <div class="columns">
+                <div class="column is-2">
+                    <p class="menu-label">Sort By</p>
+                    <aside class="menu">
+                        <select id="sort_by_select">
+                            <option value="title_asc">Title Ascending</option>
+                            <option value="title_desc">Title Descending</option>
+                            <option value="created_by_asc">Created By Ascending</option>
+                            <option value="created_by_desc">Created By Descending</option>
+                        </select>
+                        <p class="menu-label">Notes</p>
+                        <ul class="menu-list">
+                            {% for note in notes %}
+                            <li>
+                                <a href="{% url 'notes:editor' lecture.id %}?noteid={{ note.id }}&sort_by={{ sort_by }}" id="note_link" sort_by="sort_by">{{note.title}}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <p class="menu-label">Archived Notes</p>
+                        <ul class="menu-list">
+                            {% for n in archived_notes %}
+                       
+                                <li class ="container">{{n.title}}
+                                    <form method="post" action="{% url 'notes:delete_archived_note' n.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" onclick="return confirm('Are you sure you want to delete this archived note?')">Delete</button>
+                                    </form>
+                                    <form method="post" action="{% url 'notes:restore_archived_note' n.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit">Restore</button>
+                                    </form>
+                                </li>
+
+                                
+                            {% endfor %}
+                        </ul>
+                    </aside>
+                </div>
+
+                <div class="column is-10">
+                    <h1 class="title is-2">
+                        <a href="{% url 'notes:editor' lecture.id %}?noteid={{ note.id }}&sort_by={{ sort_by }}" id="note_link" sort_by="sort_by"><i class="fa-solid fa-arrow-left"></i></a>
+                        {{note.title}}
+                    </h1>   
+                    {% for h in outline %}
+                        {{ h | safe }}
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <script>
+            const selectElement = document.getElementById('sort_by_select');
+        
+            // Function to handle the change event on the select element
+            selectElement.addEventListener('change', function() {
+                // Get the selected value from the dropdown
+                const selectedValue = selectElement.value;
+        
+                // Redirect to the new URL with the selected sorting option
+                window.location.href = `{% url 'notes:editor' lecture.id %}?noteid={{ noteid }}&sort_by=${selectedValue}`;
+            });
+        
+            // Set the selected option in the dropdown based on the sort_by value from the URL
+            const sort_by_from_url = "{{ sort_by }}";
+            if (sort_by_from_url) {
+                selectElement.value = sort_by_from_url;
+            }
+        </script>
+    </body>
+</html>

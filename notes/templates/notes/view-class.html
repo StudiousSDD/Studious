@@ -3,48 +3,54 @@
 {% load static %}
 
 {% block add_to_head %}
-  <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
-  <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
-  <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
-  <!-- <link href="{% static 'notes/static/myfirst.css' %}" rel="stylesheet"> -->
+<link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+<!-- <link href="{% static 'notes/static/myfirst.css' %}" rel="stylesheet"> -->
 
-  <style>
-    div.container {
-      display: flex;
-      flex-wrap: wrap;
-      border-radius: 10px;
-      color: maroon;
-      background-color: lightpink;
-      justify-content: space-between;
-      height: 100%;
-    }
+<style>
+  div.container {
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 10px;
+    color: maroon;
+    background-color: lightpink;
+    justify-content: space-between;
+    height: 100%;
+  }
 
-    div.className {
-      display: flex;
-    }
+  div.className {
+    display: flex;
+  }
 
-    h2.container {
-      display: flex;
-      border-radius: 10px;
-      color: Black;
-      justify-content: space-between;
-    }
+  h2.container {
+    display: flex;
+    border-radius: 10px;
+    color: Black;
+    justify-content: space-between;
+  }
 
-    a.addClassLink {
-      border-radius: 50%;
-      height: 40px;
-      width: 40px;
-      display: inline-flex;
-      background-color: maroon;
-      justify-content: center;
-      justify-items: center;
-      left: 0;
-    }
+  a.addClassLink {
+    border-radius: 50%;
+    height: 40px;
+    width: 40px;
+    display: inline-flex;
+    background-color: maroon;
+    justify-content: center;
+    justify-items: center;
+    left: 0;
+  }
 
-    a.addClassLink:link{
-      text-decoration: none;
-    }
-  </style>
+  a.addClassLink:link {
+    text-decoration: none;
+  }
+
+  div.buttons {
+    display: inline-flex;
+    float: right;
+    height: 100%;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -52,36 +58,87 @@
   <div class="col-sm-3 col-12 border-end">
     <div class="row sticky-top">
       <div class="col-12 mb-3">
-        <h2 class="container">
-          Classes
-          <div>
-            <a href="{% url 'notes:add_event' %}" class="addClassLink">
+        <div class="mb-3">
+          <h2 class="container">
+            Classes
+            <div>
+              <a href="{% url 'notes:add_event' %}" class="addClassLink">
                 <i class="fa-solid fa-plus" style="color: white; align-self: center; justify-self: center; "></i>
-            </a>
-            <a href="{% url 'notes:import_class' %}" class="addClassLink">
-              <i class="fa-solid fa-file-import" style="color: white; align-self: center; justify-self: center; "></i>
-            </a>
+              </a>
+              <a href="{% url 'notes:import_class' %}" class="addClassLink">
+                <i class="fa-solid fa-file-import" style="color: white; align-self: center; justify-self: center; "></i>
+              </a>
+            </div>
+          </h2>
+          <div class="class-list">
+
           </div>
-        </h2>
-        <div class="class-list">
-          
+          <div class="list-group">
+            {% for c in classes %}
+            <a class="list-group-item list-group-item-action"
+              style="background-color: {{ c.calendar_event.color_event }}" href="/class/{{ c.id }}/">{{ c.name }}</a>
+            {% endfor %}
+          </div>
         </div>
-        <div class="list-group">
-          {% for c in classes %}
-            <a class="list-group-item list-group-item-action" style="background-color: {{ c.calendar_event.color_event }}" href="/class/{{ c.name }}/">{{ c.name }}</a>
-          {% endfor %}
+        <div class="mb-5">
+          <h2 class="container">To-do List
+            <a href="{% url 'notes:edit_todo' classid.id %}" class="addClassLink">
+              <i class="fa-solid fa-plus" style="color: white; align-self: center; justify-self: center; "></i>
+            </a>
+          </h2>
+          <form action='' method='post'>
+            {% csrf_token %}
+            {% for t in ToDos %}
+            <a class="list-group-item list-group-item-action"
+              style="background-color: {{ t.cls.calendar_event.color_event }}"
+              href="{% url 'notes:edit_todo' t.cls.id %}?todoid={{t.id}}">
+              {{t.title}}
+              <input type="checkbox" value={{t.id}} name="checkbox_data" {% if t.completed %} checked {% endif %} >
+            </a>
+            {% endfor %}
+            {% if ToDos %}
+            <input type="submit" value="submit">
+            {% endif %}
+          </form>
+        </div>
+        <div class="mb-5">
+          {% if archived_classes %}
+          <h2 class="container">
+            Archived Classes
+          </h2>
+          <div class="class-list">
+
+          </div>
+          <div class="list-group">
+            {% for c in archived_classes %}
+            <div class="list-group-item" style="background-color: {{ c.calendar_event.color_event }}"
+              href="/class/{{ c.name }}/">
+              {{ c.name }}
+              <div class="buttons">
+                <a href ="{% url 'notes:restore_class' c.id %}">
+                  <i class="fa-solid fa-trash-restore" style="color: grey; margin-right: 10px;"></i>
+                </a>
+                <a href="{% url 'notes:delete_class' c.id %}">
+                  <i class="fa-solid fa-trash" style="color: grey"></i>
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>
   </div>
   <div class="col-sm-9 col-12 border-start">
-      <div class="field">
+    <div class="field">
       <input type="text" id="SEARCH" name="SEARCH" style="width:100%;" placeholder="Search for notes...">
-      
+
       <h1>{{classid.name}}</h1>
-      <div class = "col-5">
+      <div class="col-5">
         <a href="{% url 'notes:edit_class' classid.id %}"><i class="fa-solid fa-gear"></i></a>
-        <a href="{% url 'notes:delete_class' classid.id %}"><i class="fa-solid fa-trash" style="color: maroon"></i></a>
+        <a href="{% url 'notes:archive_class' classid.id %}"><i class="fa-solid fa-archive"
+            style="color: maroon"></i></a>
         <div class="class-list">
           <label for="sort-by">Sort by:</label>
           <select id="sort-by" name="sort-by">
@@ -89,41 +146,51 @@
             <option value="earliest" {% if sort_by == 'earliest' %}selected{% endif %}>Earliest</option>
           </select>
         </div>
-        
+
       </div>
       {% for lecture in lecture_queryset %}
       <div class="row border-top">
         <div class = "col-11">
-          <h2>Lecture: {{lecture.lecture_number}} </h2>
+          <h2>{{lecture}}</h2>
         </div>
       </div>
-      <ul class="unstyled-list">
+      <div class="list-group">
         {% for note in lecture.note_set.all %}
-          <li><a href="{% url 'notes:editor' lecture.id %}?noteid={{note.id}}">{{note.title}}</a></li>
+        <a class="list-group-item list-group-item-action"
+          style="background-color: {{ note.color }}" href="{% url 'notes:editor' lecture.id %}?noteid={{note.id}}">{{ note.title }}</a>
         {% endfor %}
-      </ul>
-      <div class = "col-5">
+      </div>
+      <div class="col-5">
         <a href="{% url 'notes:editor' lecture.id %}">New Note</a>
       </div>
       {% endfor %}
-      <div class = "col-11">
-        <h3><a href="{% url 'notes:create_lecture' %}?classid={{classid}}">New Lecture</a></h3>
+      <div class="col-11">
+        <h3><a href="{% url 'notes:create_lecture' %}?classid={{classid.id}}">New Lecture</a></h3>
       </div>
+    </div>
   </div>
+
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
 </div>
 
-<script>
-  const sortSelect = document.getElementById('sort-by');
+  <script>
+    const sortSelect = document.getElementById('sort-by');
 
-  sortSelect.addEventListener('change', function() {
-    const selectedValue = this.value;
-    const currentUrl = new URL(window.location.href);
-    
-    currentUrl.searchParams.set('sort_by', selectedValue);
+    sortSelect.addEventListener('change', function () {
+      const selectedValue = this.value;
+      const currentUrl = new URL(window.location.href);
 
-    window.location.href = currentUrl.toString();
-  });
-</script>
+      currentUrl.searchParams.set('sort_by', selectedValue);
+
+      window.location.href = currentUrl.toString();
+    });
+  </script>
 
 
-{% endblock %}
+  {% endblock %}
