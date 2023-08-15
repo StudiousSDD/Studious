@@ -237,36 +237,6 @@
             });
         });
     </script>
-    </script>
-    <script>
-        const searchButton = document.getElementById('search_button');
-        const searchInput = document.getElementById('search_input');
-        const notesList = document.querySelectorAll('.menu-list li');
-    
-        searchButton.addEventListener('click', function () {
-            const searchTerm = searchInput.value.toLowerCase();
-            let matchingNotes = '';
-    
-            notesList.forEach(note => {
-                const noteTitle = note.querySelector('a').textContent;
-                const noteContent = note.querySelector('.content').textContent.toLowerCase();
-                
-                if (noteContent.includes(searchTerm)) {
-                    matchingNotes += noteTitle + '\n';
-                }
-            });
-    
-            if (matchingNotes) {
-                // Replace this with your own modal implementation or use an alert
-                alert('Matching Notes:\n' + matchingNotes);
-            } else {
-                alert('No matching notes found.');
-            }
-        });
-    </script>
-    ``
-    
-
 </body>
 
 </html>
