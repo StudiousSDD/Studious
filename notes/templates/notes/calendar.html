@@ -16,7 +16,7 @@
       height: 40px;
       width: 40px;
       display: inline-flex;
-      background-color: maroon;
+      background-color: rgb(44, 62, 80);
       justify-content: center;
       justify-items: center;
       margin-top: 10px;
@@ -87,13 +87,7 @@
   <div class="col-lg-3 col-12">
     <div class="row">
       <div class="col-lg-12 col-6 mb-lg-3">
-        <h1>Class List</h1>
-        <div class="list-group">
-          {% for c in classes %}
-            <a class="list-group-item list-group-item-action" style="background-color: {{ c.calendar_event.color_event }}" href="/class/{{ c.id }}/">{{ c.name }}</a>
-          {% endfor %}
-        </div>
-        <h2>
+        <h2>Class List
           <a href="{% url 'notes:add_event' %}" class="addClassLink">
             <i class="fa-solid fa-plus" style="color: white; align-self: center; justify-self: center; "></i>
           </a>
@@ -101,10 +95,15 @@
             <i class="fa-solid fa-file-import" style="color: white; align-self: center; justify-self: center; "></i>
           </a>
         </h2>
+        <div class="list-group">
+          {% for c in classes %}
+            <a class="list-group-item list-group-item-action" style="background-color: {{ c.calendar_event.color_event }}" href="/class/{{ c.id }}/">{{ c.name }}</a>
+          {% endfor %}
+        </div>
       </div>
       {% if archived_classes %}
         <div class="mb-5">
-        <h1>Archived Classes</h1>
+        <h2>Archived Classes</h2>
         <div class="class-list">
 
         </div>
@@ -128,7 +127,11 @@
       {%endif%}
 
       <div class="col-lg-12 col-6 mb-lg-3">
-        <h1>To-do List</h1>
+        <h2>To-Do List
+          <a href="{% url 'notes:edit_todo_no_class' %}" class="addClassLink">
+            <i class="fa-solid fa-plus" style="color: white; align-self: center; justify-self: center; "></i>
+          </a>
+        </h2>
         <form action = '' method='post'>
           {% csrf_token %}
           {% for t in ToDos %}
@@ -150,11 +153,6 @@
           <input type="submit" value="submit">
           {% endif %}
         </form>
-        <h2>
-          <a href="{% url 'notes:edit_todo_no_class' %}" class="addClassLink">
-            <i class="fa-solid fa-plus" style="color: white; align-self: center; justify-self: center; "></i>
-          </a>
-        </h2>
       </div>
     </div>
   </div>

@@ -13,7 +13,7 @@
     display: flex;
     flex-wrap: wrap;
     border-radius: 10px;
-    color: maroon;
+    color: rgb(44, 62, 80);
     background-color: lightpink;
     justify-content: space-between;
     height: 100%;
@@ -35,7 +35,7 @@
     height: 40px;
     width: 40px;
     display: inline-flex;
-    background-color: maroon;
+    background-color: rgb(44, 62, 80);
     justify-content: center;
     justify-items: center;
     left: 0;
@@ -60,7 +60,7 @@
       <div class="col-12 mb-3">
         <div class="mb-3">
           <h2 class="container">
-            Classes
+            Class List
             <div>
               <a href="{% url 'notes:add_event' %}" class="addClassLink">
                 <i class="fa-solid fa-plus" style="color: white; align-self: center; justify-self: center; "></i>
@@ -81,7 +81,7 @@
           </div>
         </div>
         <div class="mb-5">
-          <h2 class="container">To-do List
+          <h2 class="container">To-Do List
             <a href="{% url 'notes:edit_todo' classid.id %}" class="addClassLink">
               <i class="fa-solid fa-plus" style="color: white; align-self: center; justify-self: center; "></i>
             </a>
@@ -133,12 +133,11 @@
   <div class="col-sm-9 col-12 border-start">
     <div class="field">
       <input type="text" id="SEARCH" name="SEARCH" style="width:100%;" placeholder="Search for notes...">
-
       <h1>{{classid.name}}</h1>
+      <a href="{% url 'notes:edit_class' classid.id %}"><i class="fa-solid fa-gear"></i></a>
+      <a href="{% url 'notes:archive_class' classid.id %}"><i class="fa-solid fa-archive" style="color: maroon"></i></a>
       <div class="col-5">
-        <a href="{% url 'notes:edit_class' classid.id %}"><i class="fa-solid fa-gear"></i></a>
-        <a href="{% url 'notes:archive_class' classid.id %}"><i class="fa-solid fa-archive"
-            style="color: maroon"></i></a>
+        
         <div class="class-list">
           <label for="sort-by">Sort by:</label>
           <select id="sort-by" name="sort-by">
@@ -168,15 +167,14 @@
         <h3><a href="{% url 'notes:create_lecture' %}?classid={{classid.id}}">New Lecture</a></h3>
       </div>
     </div>
-  </div>
-
-  {% if messages %}
+    {% if messages %}
     <ul class="messages">
       {% for message in messages %}
         <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
       {% endfor %}
     </ul>
   {% endif %}
+  </div>
 </div>
 
   <script>

@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib import messages
+from django.db.models import Q
 
 from icalendar import Calendar
 from datetime import datetime
@@ -28,7 +29,7 @@ def home_calendar_view(request):
     if (request.user.is_authenticated):
         #get all the classes associated with this account
         all_classes = Class.objects.filter(user=request.user, archived=False)
-        todos = ToDo.objects.filter(user=request.user, cls__archived=False)
+        todos = ToDo.objects.filter(Q(cls__archived=False) | Q(cls__isnull=True), user=request.user )
         archived_classes = Class.objects.filter(user=request.user, archived=True)
 
         #if they submit a change to the to-dos
@@ -93,7 +94,6 @@ def todo_api(request):
     start = request.GET.get("start").rstrip('Z')
     end = request.GET.get("end").rstrip('Z')
     timezone = request.GET.get("timeZone")
-    calendar_slug = request.GET.get("calendar_slug")
 
     start = datetime.strptime(start, "%Y-%m-%dT%H:%M:%S")
     end = datetime.strptime(end, "%Y-%m-%dT%H:%M:%S")
@@ -103,13 +103,11 @@ def todo_api(request):
         current_tz = pytz.timezone(timezone)
         start = current_tz.localize(start)
         end = current_tz.localize(end)
-
-    cal = get_object_or_404(Calendar, slug=calendar_slug)
     
     response_data = []
     
     # finds all of the user's classes and adds the todo items from them
-    todo_items = ToDo.objects.filter( cls__archived=False, user=request.user)
+    todo_items = ToDo.objects.filter( Q(cls__archived=False) | Q(cls__isnull=True), user=request.user)
     for i in todo_items:
             url = reverse('notes:view_class', args=[i.cls.id]) if i.cls else reverse('notes:home_page')
             color = i.cls.calendar_event.color_event if i.cls else '#808080'
