@@ -1,8 +1,5 @@
-from django.contrib import admin 
 from django.urls import path
 from . import views
-
-# from notes.views import editor, delete_document, delete_class, view_class
 
 app_name = "notes"
 urlpatterns = [
