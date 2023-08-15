@@ -52,7 +52,7 @@ class Lecture(models.Model):
 # a Note displays as 'Lecture display' 'Note title' i.e. SD&D Lecture 1 First Day Notes
 class Note(models.Model):
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE, null=True)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, null=True)
+    tag = models.ForeignKey(Tag, on_delete=models.SET_NULL, null=True)
     
     title = models.CharField(max_length=31)
     content = models.TextField()
@@ -70,7 +70,7 @@ class Note(models.Model):
 # it is held separately to be restored or deleted later
 class ArchivedNote(models.Model):
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE, null=True)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, null=True)
+    tag = models.ForeignKey(Tag, on_delete=models.SET_NULL, null=True)
     
     title = models.CharField(max_length=31)
     content = models.TextField()
