@@ -136,6 +136,17 @@ def view_class(request, classid):
         
         #get all the lectures for that class
         lecture_queryset = class_instance.lecture_set.all()
+
+        search_query = request.GET.get('search', '')
+        search_results_content = []
+        if search_query:
+          for lecture in lecture_queryset:
+            search_results_content = [note for note in lecture.note_set.filter(content__icontains=search_query)]
+
+        search_results_tag = []
+        if search_query:
+          for lecture in lecture_queryset:
+            search_results_tag = [note for note in lecture.note_set.filter(tag__name=search_query)]
                 
         #sort the notes
         sort_by = request.GET.get('sort_by', 'latest')  # Default to sorting by latest
@@ -171,6 +182,9 @@ def view_class(request, classid):
             'lecture_queryset' : lecture_queryset,
             'ToDos'   : todos,
             'archived_classes' : archived_classes,
+            'search_query': search_query,
+            'search_results_content': search_results_content,
+            'search_results_tag': search_results_tag,
         }
     else:
         context = None

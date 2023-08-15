@@ -6,7 +6,6 @@
 <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
 <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
 <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
-<!-- <link href="{% static 'notes/static/myfirst.css' %}" rel="stylesheet"> -->
 
 <style>
   div.container {
@@ -50,6 +49,10 @@
     float: right;
     height: 100%;
   }
+
+  header { border-bottom: 1px solid #000; }
+  header > h1 { display: inline-block; }
+  header span { margin-left: 100px; }
 </style>
 {% endblock %}
 
@@ -132,21 +135,42 @@
   </div>
   <div class="col-sm-9 col-12 border-start">
     <div class="field">
-      <input type="text" id="SEARCH" name="SEARCH" style="width:100%;" placeholder="Search for notes...">
-      <h1>{{classid.name}}</h1>
-      <a href="{% url 'notes:edit_class' classid.id %}"><i class="fa-solid fa-gear"></i></a>
-      <a href="{% url 'notes:archive_class' classid.id %}"><i class="fa-solid fa-archive" style="color: maroon"></i></a>
-      <div class="col-5">
-        
-        <div class="class-list">
-          <label for="sort-by">Sort by:</label>
-          <select id="sort-by" name="sort-by">
-            <option value="latest" {% if sort_by == 'latest' %}selected{% endif %}>Latest</option>
-            <option value="earliest" {% if sort_by == 'earliest' %}selected{% endif %}>Earliest</option>
-          </select>
-        </div>
+     <!-- Search form -->
+     <form method="get">
+        <input type="text" name="search" value="{{ search_query }}">
+        <button type="submit">Search</button>
+      </form>
 
-      </div>
+      <!-- Display search results -->
+      {% if search_results_content %}
+        <h3>Matched Text:</h3>
+        {% for note in search_results_content %}
+          <a class="list-group-item list-group-item-action"
+          style="background-color: {{ note.color }}" href="{% url 'notes:editor' note.lecture.id %}?noteid={{note.id}}">{{ note.title }}
+          <span class="badge badge-light" style="background-color: lightslategray">{{ note.tag }}</span>
+          </a>
+        {% endfor %}
+      {% endif %}
+      {% if search_results_tag %}
+        <h3>Matched Tag:</h3>
+        {% for note in search_results_tag %}
+          <a class="list-group-item list-group-item-action"
+          style="background-color: {{ note.color }}" href="{% url 'notes:editor' note.lecture.id %}?noteid={{note.id}}">{{ note.title }}
+          <span class="badge badge-light" style="background-color: lightslategray">{{ note.tag }}</span>
+          </a>
+        {% endfor %}
+      {% endif %}
+      
+      <header>
+        <h1>{{classid.name}}</h1>
+        <a href="{% url 'notes:edit_class' classid.id %}"><i class="fa-solid fa-gear"></i></a>
+        <a href="{% url 'notes:archive_class' classid.id %}"><i class="fa-solid fa-archive" style="color: maroon"></i></a>
+        <label for="sort-by">Sort by:</label>
+        <select id="sort-by" name="sort-by">
+          <option value="latest" {% if sort_by == 'latest' %}selected{% endif %}>Latest</option>
+          <option value="earliest" {% if sort_by == 'earliest' %}selected{% endif %}>Earliest</option>
+        </select>
+      </header>  
       {% for lecture in lecture_queryset %}
       <div class="row border-top">
         <div class = "col-11">
@@ -156,7 +180,9 @@
       <div class="list-group">
         {% for note in lecture.note_set.all %}
         <a class="list-group-item list-group-item-action"
-          style="background-color: {{ note.color }}" href="{% url 'notes:editor' lecture.id %}?noteid={{note.id}}">{{ note.title }}</a>
+          style="background-color: {{ note.color }}" href="{% url 'notes:editor' lecture.id %}?noteid={{note.id}}">{{ note.title }}
+          <span class="badge badge-light" style="background-color: lightslategray">{{ note.tag }}</span>
+        </a>
         {% endfor %}
       </div>
       <div class="col-5">
