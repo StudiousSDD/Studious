@@ -140,14 +140,17 @@ def view_class(request, classid):
         search_query = request.GET.get('search', '')
         search_results_content = []
         if search_query:
-          for lecture in lecture_queryset:
-            search_results_content = [note for note in lecture.note_set.filter(content__icontains=search_query)]
+            for lecture in lecture_queryset:
+                for note in lecture.note_set.filter(content__icontains=search_query):
+                    search_results_content.append(note)
+
 
         search_results_tag = []
         if search_query:
-          for lecture in lecture_queryset:
-            search_results_tag = [note for note in lecture.note_set.filter(tag__name=search_query)]
-                
+            for lecture in lecture_queryset:
+                for note in lecture.note_set.filter(tag__name=search_query):
+                    search_results_tag.append(note)
+
         #sort the notes
         sort_by = request.GET.get('sort_by', 'latest')  # Default to sorting by latest
         if sort_by == 'latest':
