@@ -79,20 +79,21 @@
             <div class="mb-5">
               <h2>Archived Classes</h2>
               <div class="list-group">
-              {% for c in archived_classes %}
-                <div class="list-group-item" style="background-color: {{ c.calendar_event.color_event }}"
-                  href="/class/{{ c.name }}/">
-                  {{ c.name }}
-                  <div class="buttons">
-                    <a href ="{% url 'notes:restore_class' c.id %}">
-                      <i class="fa-solid fa-trash-restore" style="color: grey; margin-right: 10px;"></i>
-                    </a>
-                    <a href="{% url 'notes:delete_class' c.id %}">
-                      <i class="fa-solid fa-trash" style="color: grey"></i>
-                    </a>
+                {% for c in archived_classes %}
+                  <div class="list-group-item" style="background-color: {{ c.calendar_event.color_event }}"
+                    href="/class/{{ c.name }}/">
+                    {{ c.name }}
+                    <div class="buttons">
+                        <a href ="{% url 'notes:restore_class' c.id %}">
+                          <i class="fa-solid fa-trash-restore" style="color: grey; margin-right: 10px;"></i>
+                        </a>
+                        <a href="{% url 'notes:delete_class' c.id %}">
+                          <i class="fa-solid fa-trash" style="color: grey"></i>
+                        </a>
+                    </div>
                   </div>
-                </div>
-              {% endfor %}
+                {% endfor %}
+              </div>
             </div>
           {%endif%}
         </div>
