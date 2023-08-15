@@ -387,6 +387,11 @@ def editor(request, lectureid):
     # the set of all archived notes for the requested lecture
     archived_notes = lec.archivednote_set.all()
 
+    search_query = request.GET.get('search', '')
+    search_results = []
+    if search_query:
+        search_results = [note.title for note in note.filter(content__icontains=search_query)]
+
     # sorting notes
     sort_by = request.GET.get('sort_by', 'title')
     if sort_by == 'title_asc':
@@ -469,6 +474,8 @@ def editor(request, lectureid):
         'sort_by' : sort_by,
         'archived_notes' : archived_notes,
         'form': form,
+        'search_query': search_query,
+        'search_results': search_results,
     }
     return render(request, 'notes/editor.html',context)                 
 

@@ -79,6 +79,25 @@
                             {% endfor %}
                         </ul>
                         {% endif %}
+
+                        <!-- Display search results -->
+     <!-- Search form -->
+     <form method="get">
+        <input type="text" name="search" value="{{ search_query }}">
+        <button type="submit">Search</button>
+    </form>
+
+    <!-- Display search results -->
+    {% if search_results %}
+    <h2>Search Results:</h2>
+    <ul>
+        {% for title in search_results %}
+        <li>{{ title }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+
                     </aside>
                 </div>
 
