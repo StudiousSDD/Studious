@@ -76,7 +76,7 @@
             }
           ],
           eventClick: function(info) {
-            window.open( '/class/' + info.event.title, target="_self");
+            window.open( '/class/event/' + info.event._def.extendedProps.event_id, target="_self");
           },
         });
         calendar.render();

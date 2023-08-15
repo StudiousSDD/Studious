@@ -447,11 +447,11 @@ def editor(request, lectureid):
                 document.tag = tag
                 document.save()
 
-                return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (noteid, sort_by))
+                return redirect(f'/notes/{lectureid}?noteid={noteid}&sort_by={sort_by}')
             # creates new note
             else: 
                 document = Note.objects.create(title=title, content=content, lecture=lec, tag=tag, color=color)
-                return redirect('/notes/{}?noteid=%i&sort_by=%s'.format(lectureid) % (document.id,sort_by))
+                return redirect(f'/notes/{lectureid}?noteid={document.id}&sort_by={sort_by}')
     else:
         if noteid > 0:
             initial_data = {
@@ -709,3 +709,9 @@ def hex_to_hue(hex):
     rgb = tuple(int(hex[i:i+2], 16) for i in (0, 2, 4))
     hsl = colorsys.rgb_to_hls(rgb[0], rgb[1], rgb[2])
     return math.floor(hsl[0] * 360)
+
+# go to a class page given an event id
+def class_from_event(request, eventid):
+    event = get_object_or_404(Event, id=eventid)
+    classid = get_object_or_404(Class, calendar_event=event).id
+    return redirect('notes:view_class', classid=classid)
