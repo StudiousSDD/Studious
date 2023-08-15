@@ -110,7 +110,7 @@ def todo_api(request):
     todo_items = ToDo.objects.filter( Q(cls__archived=False) | Q(cls__isnull=True), user=request.user)
     for i in todo_items:
             url = reverse('notes:view_class', args=[i.cls.id]) if i.cls else reverse('notes:home_page')
-            color = i.cls.calendar_event.color_event if i.cls else '#808080'
+            color = i.cls.calendar_event.color_event if i.cls else '#d3d3d3'
             fullcal_obj = {
                 "title": i.title,
                 "start": i.due_date,
@@ -241,7 +241,7 @@ def archive_class(request, classid):
     eve.save()
 
     # redirect to the previous page
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    return redirect("/")
 
 # restore a class
 def restore_class(request, classid):
