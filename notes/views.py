@@ -698,7 +698,8 @@ def delete_todo(request, todoid):
     cls = todo.cls
     todo.delete()
     #return to the class page
-    return redirect(f'/class/{cls.id}')
+    redir = f'/class/{cls.id}' if cls else f'/'
+    return redirect(redir)
 
 
 #############################
