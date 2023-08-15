@@ -70,10 +70,12 @@ class Note(models.Model):
 # it is held separately to be restored or deleted later
 class ArchivedNote(models.Model):
     lecture = models.ForeignKey(Lecture, on_delete=models.CASCADE, null=True)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, null=True)
     
     title = models.CharField(max_length=31)
     content = models.TextField()
     archived_at = models.DateTimeField(auto_now_add=True)
+    color = models.CharField(max_length=16)
 
     def __str__(self):
         return self.title

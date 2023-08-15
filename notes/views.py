@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib import messages
 
-from icalendar import Calendar
+from icalendar import Calendar as ical
 from datetime import datetime
 import colorsys, random, math, pytz
 
@@ -196,7 +196,7 @@ def import_class(request):
         #create the classes with the events
         if form.is_valid():
             data = request.FILES['file'].read()
-            cal = Calendar.from_ical(data)
+            cal = ical.from_ical(data)
             made = []
             for component in cal.walk():
                 if component.name == "VEVENT" and component.get('summary') not in made:
@@ -211,8 +211,8 @@ def import_class(request):
                                                     rule = create_rule(component.get('summary'), component.get('rrule').get('BYDAY')),      
                                                 ) 
                     #create the class from the event
-                    create_class_from_event(event)
-            #redirect into the class page
+                    create_class_from_event(event, request.user)
+            #redirect into the home page
             return redirect('/')
     return render(request, "notes/import_class.html",{'form': ImportEvent})
 
@@ -478,8 +478,10 @@ def archive_document(request, noteid):
     #Archiving the document 
     archived_document = ArchivedNote(
         lecture = document.lecture,
+        tag = document.tag,
         title = document.title,
         content = document.content,
+        color = document.color,
     )
 
     archived_document.save() 
@@ -492,11 +494,13 @@ def archive_document(request, noteid):
 # change an archived note back to a note
 def restore_archived_note(request,noteid):
     document = get_object_or_404(ArchivedNote,pk=noteid)
-    #Archiving the document 
+    # UNarchiving the document 
     note = Note(
         lecture = document.lecture,
+        tag = document.tag,
         title = document.title,
         content = document.content,
+        color = document.color,
     )
 
     note.save() 
