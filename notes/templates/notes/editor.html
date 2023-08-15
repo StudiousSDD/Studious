@@ -57,7 +57,9 @@
                             {% for note in note %}
                             <li>
                                 <a href="{% url 'notes:editor' lecture.id %}?noteid={{ note.id }}&sort_by={{ sort_by }}" id="note_link" sort_by="sort_by">{{note.title}}
-                                    <span class="tag">{{ note.tag }}</span>
+                                    {% if note.tag is not None %}
+                                        <span class="tag">{{ note.tag }}</span>
+                                    {% endif %}
                                 </a>
                             </li>
                             {% endfor %}
@@ -141,19 +143,19 @@
                         <div class="field">
                             <label class="label">Tags</label>                            
                             <div class="control">
-                                {{ form.new_tag.label_tag }}
+                                <label for="id_new_tag">{{ form.new_tag.label_tag }}</label>
                                 {{ form.new_tag }}
                             </div>
 
                             <div class="control">
-                                {{ form.tag.label_tag }}
+                                <label for="id_tag">{{ form.tag.label_tag }}</label>
                                 {{ form.tag }}
                             </div>
                             
                             <div class="control">
                                 {% if document.tag %}
-                                    Delete Tag:
-                                        <input type="checkbox" name="delete_tag" id="delete_tag">
+                                    <label for="delete_tag">Delete Tag:</label>
+                                    <input type="checkbox" name="delete_tag" id="delete_tag">
                                 {% endif %}
 
                             </div>

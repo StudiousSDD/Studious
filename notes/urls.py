@@ -17,6 +17,7 @@ urlpatterns = [
     # Classes
 
     path('class/<int:classid>/', views.view_class, name='view_class'),
+    path('class/event/<int:eventid>/', views.class_from_event, name='view_class_from_event'),
 
     path("class/<int:classid>/edit_class", views.edit_class, name="edit_class"),
 
