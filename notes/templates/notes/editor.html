@@ -115,7 +115,7 @@
                             </label>
 
                             <div class="control">
-                                <input type="text" class="input" name="title" placeholder="Title" {% if note %}
+                                <input type="text" class="input" name="title" placeholder="Title" maxlength="31" {% if note %}
                                     value="{{document.title}}" {% endif %}>
                             </div>
                         
@@ -127,20 +127,19 @@
                                 {{ form.new_tag }}
                             </div>
 
-                                <div class="control">
-                                    <label for="id_tag">{{ form.tag.label_tag }}</label>
-                                    {{ form.tag }}
-                                </div>
-                                
-                                <div class="control">
-                                    {% if document.tag %}
-                                        <label for="delete_tag">Delete Tag:</label>
-                                        <input type="checkbox" name="delete_tag" id="delete_tag">
-                                    {% endif %}
-
-                                </div>
+                            <div class="control">
+                                <label for="id_tag">{{ form.tag.label_tag }}</label>
+                                {{ form.tag }}
+                            </div>
+                            
+                            <div class="control">
+                                {% if document.tag %}
+                                    <label for="delete_tag">Delete Tag:</label>
+                                    <input type="checkbox" name="delete_tag" id="delete_tag">
+                                {% endif %}
                             </div>
                         </div>
+                    </div>
 
                         <div class="field">
                             <label class="label">Content</label>

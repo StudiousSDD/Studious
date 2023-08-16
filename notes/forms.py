@@ -33,6 +33,11 @@ class AddEvent(ModelForm):
         model = Event
         fields = ['title', 'calendar',]
         widgets = {
+            'title' : forms.Textarea(attrs={
+                'rows': '1',
+                'cols': '20',
+                'maxlength': '200',
+            }),
             'calendar': forms.HiddenInput(),
         }
         labels = {
@@ -66,7 +71,7 @@ class EditEventForm(ModelForm):
         }
 # allow users to select a tag or create a new tag for each note
 class NoteForm(forms.ModelForm):
-    new_tag = forms.CharField(max_length=100, required=False, label="Create New Tag", widget=forms.TextInput(attrs={'placeholder': 'e.g., homework'}))
+    new_tag = forms.CharField(max_length=31, required=False, label="Create New Tag", widget=forms.TextInput(attrs={'placeholder': 'e.g., homework'}))
     delete_tag = forms.BooleanField(required=False, label="Delete Tag")
 
     class Meta:

@@ -75,7 +75,7 @@
                             Title
                         </label>
                         <div class="control">
-                            <input type="text" class="input" name="title" placeholder="Title" {% if todo %}
+                            <input type="text" class="input" name="title" placeholder="Title" maxlength="31" {% if todo %}
                                 value="{{document.title}}" {% endif %}>
                         </div>
 
@@ -122,7 +122,7 @@
                           Title
                       </label>
                       <div class="control">
-                          <input type="text" class="input" name="title" placeholder="Title" {% if todo %}
+                          <input type="text" class="input" name="title" placeholder="Title" maxlength="31" {% if todo %}
                               value="{{document.title}}" {% endif %}>
                       </div>
 
