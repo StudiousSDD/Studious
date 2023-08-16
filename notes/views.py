@@ -325,7 +325,7 @@ def add_event(request):
             
             event.start = datetime.combine(start_date, start_time)
             event.end = datetime.combine(start_date, end_time)
-            event.end_recurring_period = end_date            
+            event.end_recurring_period = datetime.combine(end_date, end_time)           
             
             repeat = form.cleaned_data["repeat"]
             rule = create_rule(event.title, repeat)
