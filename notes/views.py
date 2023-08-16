@@ -371,7 +371,7 @@ def create_lecture(request):
             messages.info(request, 'There are no more lectures to create!')
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
         # since some lectures overlap we need to find one that starts AFTER the previous lecture (or start of class)
-        if (occurr.start > time):
+        if (occurr.start > time or time == eve.start):
             break
     occurr.save()
     # create the new lecture with the date (occurrence) we found
