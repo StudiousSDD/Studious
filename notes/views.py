@@ -267,6 +267,11 @@ def delete_class(request, classid):
     cls = Class.objects.get(pk=classid)
     eve = cls.calendar_event
 
+    # delete all the lectures for the class
+    lectures = cls.lecture_set.all()
+    for lec in lectures:
+        lec.occurrence.delete()
+
     #delete them both
     cls.delete()
     eve.delete()
